@@ -10,14 +10,10 @@
 <b>Discover a boundless design space for your most ambitious web3 projects.</b>
 </div>
 <br>
-<div align="center">
-  
-<a href="https://docs.cartesi.io/cartesi-rollups/">![Static Badge](https://img.shields.io/badge/cartesi-1.3.0-5bd1d7)</a>
-<a href="https://docs.cartesi.io/cartesi-rollups/1.3/quickstart/">![Static Badge](https://img.shields.io/badge/cartesi--cli-0.15.0-5bd1d7)</a>
-<a href="https://pkg.go.dev/github.com/calindra/nonodo">![Static Badge](https://img.shields.io/badge/nonodo-1.1.1-blue)</a>
-<a href="https://pkg.go.dev/github.com/gligneul/rollmelette">![Static Badge](https://img.shields.io/badge/rollmelette-0.1.1-yellow)</a>
-<a href="https://book.getfoundry.sh/getting-started/installation">![Static Badge](https://img.shields.io/badge/foundry-0.2.0-red)</a>
-</div>
+<p align="center">
+	<img src="https://img.shields.io/github/license/Mugen-Builders/golang-video-series?style=default&logo=opensourceinitiative&logoColor=white&color=00F6FF" alt="license">
+	<img src="https://img.shields.io/github/last-commit/Mugen-Builders/golang-video-series?style=default&logo=git&logoColor=white&color=000000" alt="last-commit">
+</p>
 
 ## 🏎️ Running:
 TODO
