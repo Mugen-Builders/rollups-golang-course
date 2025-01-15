@@ -18,6 +18,6 @@
 ## Sylabus:
 | Lesson      | Content                                | Reference                     |
 |-------------|----------------------------------------|-------------------------------|
-| **01**    | How to start a Cartesi project, how the basic input and output flow works, the types of internal interfaces your dApp can interact with, and how to use the Cartesi Explorer as your best friend during your application's development. | [README](./lesson1/README.md) |
-| **02**    | First in-depth look at the architecture behind your Cartesi application. How to customize your application by implementing business logic, using architectures and libraries that have stood the test of time in the software development ecosystem. First implementation of memory management in your application. | [README](./lesson2/README.md) |
+| **01**    | How to start a Cartesi project, how the basic IO flow works, the types of internal interfaces your dApp can interact with, and how to use the Cartesi Explorer during your application's development. | [README](./lesson1/README.md) |
+| **02**    | First in-depth look at the architecture behind your application. How to customize it by implementing business logic, using libraries that have stood the test of time in the software development ecosystem. | [README](./lesson2/README.md) |
 | **03**    | Diving deeper into state management and transitioning from in-memory state to SQLite using GORM.| [README](./lesson3/README.md) |
