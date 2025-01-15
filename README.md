@@ -4,7 +4,7 @@
 </div>
 <br>
 <div align="center">
-<i>Example set used in the video series on how to use Golang to develop Cartesi dApps.</i>
+<i>Content set used in the video series on how to use Golang to develop Cartesi dApps.</i>
 </div>
 <div align="center">
 <b>Discover a boundless design space for your most ambitious web3 projects.</b>
