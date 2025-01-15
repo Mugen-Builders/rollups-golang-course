@@ -15,7 +15,7 @@
 	<img src="https://img.shields.io/github/last-commit/Mugen-Builders/golang-video-series?style=default&logo=git&logoColor=white&color=000000" alt="last-commit">
 </p>
 
-## Sylabus:
+## Syllabus:
 | Lesson      | Content                                | Reference                     |
 |-------------|----------------------------------------|-------------------------------|
 | **01**    | How to start a Cartesi project, how the basic IO flow works, the types of internal interfaces your dApp can interact with, and how to use the Cartesi Explorer during your application's development. | [README](./lesson1/README.md) |
