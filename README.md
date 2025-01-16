@@ -11,7 +11,7 @@
 </div>
 <br>
 <p align="center">
-	<img src="https://img.shields.io/github/license/Mugen-Builders/golang-video-series?style=default&logo=opensourceinitiative&logoColor=white&color=00F6FF" alt="license">
+	<img src="https://img.shields.io/github/license/Mugen-Builders/golang-video-series?style=default&logo=opensourceinitiative&logoColor=white&color=48AED9" alt="license">
 	<img src="https://img.shields.io/github/last-commit/Mugen-Builders/golang-video-series?style=default&logo=git&logoColor=white&color=000000" alt="last-commit">
 </p>
 
