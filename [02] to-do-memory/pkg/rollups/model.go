@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 )
 
+type Input struct {
+	Path    string          `json:"path"`
+	Payload json.RawMessage `json:"payload"`
+}
+
 type FinishRequest struct {
 	Status string `json:"status"`
 }
@@ -18,9 +23,8 @@ type InspectResponse struct {
 }
 
 type AdvanceResponse struct {
-	Path     string          `json:"path"`
-	Metadata Metadata        `json:"metadata"`
-	Payload  json.RawMessage `json:"payload"`
+	Metadata Metadata `json:"metadata"`
+	Payload  string   `json:"payload"`
 }
 
 type Metadata struct {

@@ -33,7 +33,7 @@ func (r *Router) Advance(payload []byte, metadata Metadata) error {
 		return fmt.Errorf("handler: path not found: %s", input.Path)
 	}
 	if err := handler(input.Payload, metadata); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }

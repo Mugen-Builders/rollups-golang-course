@@ -5,13 +5,12 @@ import (
 	"github.com/Mugen-Builders/to-do-memory/pkg/rollups"
 )
 
-type CreateTodoInputDTO struct {
+type CreateToDoInputDTO struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	CreatedAt   int64  `json:"created_at"`
 }
 
-type CreateTodoOutputDTO struct {
+type CreateToDoOutputDTO struct {
 	Id          uint   `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -19,28 +18,28 @@ type CreateTodoOutputDTO struct {
 	CreatedAt   uint64 `json:"created_at"`
 }
 
-type CreateTodoUseCase struct {
-	TodoRepository domain.TodoRepository
+type CreateToDoUseCase struct {
+	ToDoRepository domain.ToDoRepository
 }
 
-func NewCreateTodoUseCase(todoRepository domain.TodoRepository) *CreateTodoUseCase {
-	return &CreateTodoUseCase{
-		TodoRepository: todoRepository,
+func NewCreateToDoUseCase(todoRepository domain.ToDoRepository) *CreateToDoUseCase {
+	return &CreateToDoUseCase{
+		ToDoRepository: todoRepository,
 	}
 }
 
-func (u *CreateTodoUseCase) Execute(input *CreateTodoInputDTO, metadata rollups.Metadata) (*CreateTodoOutputDTO, error) {
-	res, err := domain.NewTodo(input.Title, input.Description, metadata.Timestamp)
+func (u *CreateToDoUseCase) Execute(input *CreateToDoInputDTO, metadata rollups.Metadata) (*CreateToDoOutputDTO, error) {
+	res, err := domain.NewToDo(input.Title, input.Description, metadata.Timestamp)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err = u.TodoRepository.CreateTodo(res)
+	res, err = u.ToDoRepository.CreateToDo(res)
 	if err != nil {
 		return nil, err
 	}
 
-	return &CreateTodoOutputDTO{
+	return &CreateToDoOutputDTO{
 		Id:          res.Id,
 		Title:       res.Title,
 		Description: res.Description,

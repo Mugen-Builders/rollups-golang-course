@@ -12,22 +12,23 @@ import (
 	"github.com/google/wire"
 )
 
-var setTodoRepositoryDependency = wire.NewSet(
-	repository.NewTodoRepositoryInMemory,
-	wire.Bind(new(domain.TodoRepository), new(*repository.TodoRepositoryInMemory)),
+var setToDoRepositoryDependency = wire.NewSet(
+	repository.NewToDoRepositoryInMemory,
+	wire.Bind(new(domain.ToDoRepository), new(*repository.ToDoRepositoryInMemory)),
 )
 
+
 var setAdvanceHandlers = wire.NewSet(
-	advance_handler.NewTodoAdvanceHandlers,
+	advance_handler.NewToDoAdvanceHandlers,
 )
 
 var setInspectHandlers = wire.NewSet(
-	inspect_handler.NewTodoInspectHandlers,
+	inspect_handler.NewToDoInspectHandlers,
 )
 
 func NewAdvanceHandlers(db *configs.InMemoryDB) (*AdvanceHandlers, error) {
 	wire.Build(
-		setTodoRepositoryDependency,
+		setToDoRepositoryDependency,
 		setAdvanceHandlers,
 		wire.Struct(new(AdvanceHandlers), "*"),
 	)
@@ -36,7 +37,7 @@ func NewAdvanceHandlers(db *configs.InMemoryDB) (*AdvanceHandlers, error) {
 
 func NewInspectHandlers(db *configs.InMemoryDB) (*InspectHandlers, error) {
 	wire.Build(
-		setTodoRepositoryDependency,
+		setToDoRepositoryDependency,
 		setInspectHandlers,
 		wire.Struct(new(InspectHandlers), "*"),
 	)
@@ -44,9 +45,9 @@ func NewInspectHandlers(db *configs.InMemoryDB) (*InspectHandlers, error) {
 }
 
 type AdvanceHandlers struct {
-	TodoAdvanceHandlers *advance_handler.TodoAdvanceHandlers
+	ToDoAdvanceHandlers *advance_handler.ToDoAdvanceHandlers
 }
 
 type InspectHandlers struct {
-	TodoInspectHandlers *inspect_handler.TodoInspectHandlers
+	ToDoInspectHandlers *inspect_handler.ToDoInspectHandlers
 }

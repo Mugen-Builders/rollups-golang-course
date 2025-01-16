@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -23,16 +25,23 @@ func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *
 		if err := json.Unmarshal(response.Data, &data); err != nil {
 			return err
 		}
-		return router.Advance(&data)
+		decodedPayload, err := hex.DecodeString(data.Payload[2:])
+		if err != nil {
+			return fmt.Errorf("handler: error decoding payload: %w", err)
+		}
+		return router.Advance(decodedPayload, data.Metadata)
 	case "inspect_state":
-		return ih.TodoInspectHandlers.FindAllTodosHandler()
+		return ih.ToDoInspectHandlers.FindAllToDosHandler()
 	}
 	return nil
 }
 
 func main() {
-	// Database setup (In-Memory)
-	db := configs.SetupInMemoryDB()
+	// Database setup (In-memory)
+	db, err := configs.SetupInMemoryDB()
+	if err != nil {
+		errlog.Panicln("Failed to setup database", "error", err)
+	}
 	infolog.Println("Database setup successful")
 
 	// Dependency injection with Wire ( It could be done with others libraries like dig, fx, etc )
@@ -50,9 +59,9 @@ func main() {
 
 	// Router setup and handlers registration
 	r := rollups.NewRouter()
-	r.HandleAdvance("create_todo", ah.TodoAdvanceHandlers.CreateTodoHandler)
-	r.HandleAdvance("update_todo", ah.TodoAdvanceHandlers.UpdateTodoHandler)
-	r.HandleAdvance("delete_todo", ah.TodoAdvanceHandlers.DeleteTodoHandler)
+	r.HandleAdvance("createToDo", ah.ToDoAdvanceHandlers.CreateToDoHandler)
+	r.HandleAdvance("updateToDo", ah.ToDoAdvanceHandlers.UpdateToDoHandler)
+	r.HandleAdvance("deleteToDo", ah.ToDoAdvanceHandlers.DeleteToDoHandler)
 	infolog.Println("Router setup successful")
 
 	// Polling loop ( Is there something new to process? )

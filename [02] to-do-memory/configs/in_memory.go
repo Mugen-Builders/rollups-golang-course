@@ -7,12 +7,13 @@ import (
 )
 
 type InMemoryDB struct {
-	Todos map[uint]*domain.Todo
-	Lock  sync.RWMutex
+	ToDos map[uint]*domain.ToDo
+	Lock  *sync.RWMutex
 }
 
-func SetupInMemoryDB() *InMemoryDB {
+func SetupInMemoryDB() (*InMemoryDB, error) {
 	return &InMemoryDB{
-		Todos: make(map[uint]*domain.Todo),
-	}
+		ToDos: make(map[uint]*domain.ToDo),
+		Lock:  &sync.RWMutex{},
+	}, nil
 }

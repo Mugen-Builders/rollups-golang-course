@@ -18,35 +18,35 @@ import (
 // Injectors from wire.go:
 
 func NewAdvanceHandlers(db *configs.InMemoryDB) (*AdvanceHandlers, error) {
-	todoRepositoryInMemory := repository.NewTodoRepositoryInMemory()
-	todoAdvanceHandlers := advance_handler.NewTodoAdvanceHandlers(todoRepositoryInMemory)
+	toDoRepositoryInMemory := repository.NewToDoRepositoryInMemory(db)
+	toDoAdvanceHandlers := advance_handler.NewToDoAdvanceHandlers(toDoRepositoryInMemory)
 	advanceHandlers := &AdvanceHandlers{
-		TodoAdvanceHandlers: todoAdvanceHandlers,
+		ToDoAdvanceHandlers: toDoAdvanceHandlers,
 	}
 	return advanceHandlers, nil
 }
 
 func NewInspectHandlers(db *configs.InMemoryDB) (*InspectHandlers, error) {
-	todoRepositoryInMemory := repository.NewTodoRepositoryInMemory()
-	todoInspectHandlers := inspect_handler.NewTodoInspectHandlers(todoRepositoryInMemory)
+	toDoRepositoryInMemory := repository.NewToDoRepositoryInMemory(db)
+	toDoInspectHandlers := inspect_handler.NewToDoInspectHandlers(toDoRepositoryInMemory)
 	inspectHandlers := &InspectHandlers{
-		TodoInspectHandlers: todoInspectHandlers,
+		ToDoInspectHandlers: toDoInspectHandlers,
 	}
 	return inspectHandlers, nil
 }
 
 // wire.go:
 
-var setTodoRepositoryDependency = wire.NewSet(repository.NewTodoRepositoryInMemory, wire.Bind(new(domain.TodoRepository), new(*repository.TodoRepositoryInMemory)))
+var setToDoRepositoryDependency = wire.NewSet(repository.NewToDoRepositoryInMemory, wire.Bind(new(domain.ToDoRepository), new(*repository.ToDoRepositoryInMemory)))
 
-var setAdvanceHandlers = wire.NewSet(advance_handler.NewTodoAdvanceHandlers)
+var setAdvanceHandlers = wire.NewSet(advance_handler.NewToDoAdvanceHandlers)
 
-var setInspectHandlers = wire.NewSet(inspect_handler.NewTodoInspectHandlers)
+var setInspectHandlers = wire.NewSet(inspect_handler.NewToDoInspectHandlers)
 
 type AdvanceHandlers struct {
-	TodoAdvanceHandlers *advance_handler.TodoAdvanceHandlers
+	ToDoAdvanceHandlers *advance_handler.ToDoAdvanceHandlers
 }
 
 type InspectHandlers struct {
-	TodoInspectHandlers *inspect_handler.TodoInspectHandlers
+	ToDoInspectHandlers *inspect_handler.ToDoInspectHandlers
 }
