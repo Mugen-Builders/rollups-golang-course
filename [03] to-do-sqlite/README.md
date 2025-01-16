@@ -64,6 +64,7 @@ curl 'http://localhost:8080/inspect/todos' \
 
 **Step 11:** Access the Cartesi explorer to see all details and outputs for each input submitted:
 <br>
+
 [![Docs]][Link-docs]
 
 [Docs]: https://img.shields.io/badge/Cartesi-Explorer-79F7FA?style=for-the-badge
