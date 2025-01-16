@@ -15,17 +15,17 @@ cartesi run
 chmod +x ./tools/*.sh
 ```
 
-**Step 4:** Create a new toDo item:
+**Step 4:** Create a new To-Do item:
 ```bash
 ./tools/create_to_do.sh
 ```
 
-**Step 5:** Inspect all toDos (raw output via `jq`):
+**Step 5:** Inspect all To-Dos (raw output via `jq`):
 ```bash
 curl 'http://localhost:8080/inspect/todos' | jq
 ```
 
-**Step 6:** Inspect all toDos (decoded payload):
+**Step 6:** Inspect all To-Dos (decoded payload):
 ```bash
 curl 'http://localhost:8080/inspect/todos' \
     | jq -r '.reports[0].payload' \
@@ -34,12 +34,12 @@ curl 'http://localhost:8080/inspect/todos' \
     | jq
 ```
 
-**Step 7:** Update an existing toDo item:
+**Step 7:** Update an existing To-Do item:
 ```bash
 ./tools/update_to_do.sh
 ```
 
-**Step 8:** Inspect all toDos (decoded payload) again to confirm changes:
+**Step 8:** Inspect all To-Dos (decoded payload) again to confirm changes:
 ```bash
 curl 'http://localhost:8080/inspect/todos' \
     | jq -r '.reports[0].payload' \
@@ -48,12 +48,12 @@ curl 'http://localhost:8080/inspect/todos' \
     | jq
 ```
 
-**Step 9:** Delete a toDo item:
+**Step 9:** Delete a To-Do item:
 ```bash
 ./tools/delete_to_do.sh
 ```
 
-**Step 10:** Inspect all toDos (decoded payload) one more time:
+**Step 10:** Inspect all To-Dos (decoded payload) one more time:
 ```bash
 curl 'http://localhost:8080/inspect/todos' \
     | jq -r '.reports[0].payload' \
