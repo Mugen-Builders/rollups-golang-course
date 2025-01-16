@@ -61,3 +61,8 @@ curl 'http://localhost:8080/inspect/todos' \
     | xxd -r -p \
     | jq
 ```
+
+**Step 11:** Access the Cartesi explorer to see all details and outputs for each input submitted:
+
+[Docs]: https://img.shields.io/badge/Cartesi-Explorer-79F7FA?style=for-the-badge
+[Link-docs]: http://localhost:8080/explorer
