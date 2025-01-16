@@ -29,7 +29,7 @@ func SetupSQlite(path string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	if err := db.AutoMigrate(domain.Todo{}); err != nil {
+	if err := db.AutoMigrate(domain.ToDo{}); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 

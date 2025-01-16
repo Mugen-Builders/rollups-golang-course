@@ -12,22 +12,22 @@ import (
 	"gorm.io/gorm"
 )
 
-var setTodoRepositoryDependency = wire.NewSet(
-	repository.NewTodoRepositorySQLite,
-	wire.Bind(new(domain.TodoRepository), new(*repository.TodoRepositorySQLite)),
+var setToDoRepositoryDependency = wire.NewSet(
+	repository.NewToDoRepositorySQLite,
+	wire.Bind(new(domain.ToDoRepository), new(*repository.ToDoRepositorySQLite)),
 )
 
 var setAdvanceHandlers = wire.NewSet(
-	advance_handler.NewTodoAdvanceHandlers,
+	advance_handler.NewToDoAdvanceHandlers,
 )
 
 var setInspectHandlers = wire.NewSet(
-	inspect_handler.NewTodoInspectHandlers,
+	inspect_handler.NewToDoInspectHandlers,
 )
 
 func NewAdvanceHandlers(gormDB *gorm.DB) (*AdvanceHandlers, error) {
 	wire.Build(
-		setTodoRepositoryDependency,
+		setToDoRepositoryDependency,
 		setAdvanceHandlers,
 		wire.Struct(new(AdvanceHandlers), "*"),
 	)
@@ -36,7 +36,7 @@ func NewAdvanceHandlers(gormDB *gorm.DB) (*AdvanceHandlers, error) {
 
 func NewInspectHandlers(gormDB *gorm.DB) (*InspectHandlers, error) {
 	wire.Build(
-		setTodoRepositoryDependency,
+		setToDoRepositoryDependency,
 		setInspectHandlers,
 		wire.Struct(new(InspectHandlers), "*"),
 	)
@@ -44,9 +44,9 @@ func NewInspectHandlers(gormDB *gorm.DB) (*InspectHandlers, error) {
 }
 
 type AdvanceHandlers struct {
-	TodoAdvanceHandlers *advance_handler.TodoAdvanceHandlers
+	ToDoAdvanceHandlers *advance_handler.ToDoAdvanceHandlers
 }
 
 type InspectHandlers struct {
-	TodoInspectHandlers *inspect_handler.TodoInspectHandlers
+	ToDoInspectHandlers *inspect_handler.ToDoInspectHandlers
 }

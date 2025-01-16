@@ -5,14 +5,14 @@ import (
 	"github.com/Mugen-Builders/to-do-sqlite/pkg/rollups"
 )
 
-type UpdateTodoInputDTO struct {
+type UpdateToDoInputDTO struct {
 	Id          uint   `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Completed   bool   `json:"completed"`
 }
 
-type UpdateTodoOutputDTO struct {
+type UpdateToDoOutputDTO struct {
 	Id          uint   `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -21,18 +21,18 @@ type UpdateTodoOutputDTO struct {
 	UpdatedAt   uint64 `json:"updated_at"`
 }
 
-type UpdateTodoUseCase struct {
-	TodoRepository domain.TodoRepository
+type UpdateToDoUseCase struct {
+	ToDoRepository domain.ToDoRepository
 }
 
-func NewUpdateTodoUseCase(todoRepository domain.TodoRepository) *UpdateTodoUseCase {
-	return &UpdateTodoUseCase{
-		TodoRepository: todoRepository,
+func NewUpdateToDoUseCase(todoRepository domain.ToDoRepository) *UpdateToDoUseCase {
+	return &UpdateToDoUseCase{
+		ToDoRepository: todoRepository,
 	}
 }
 
-func (u *UpdateTodoUseCase) Execute(input *UpdateTodoInputDTO, metadata rollups.Metadata) (*UpdateTodoOutputDTO, error) {
-	res, err := u.TodoRepository.UpdateTodo(&domain.Todo{
+func (u *UpdateToDoUseCase) Execute(input *UpdateToDoInputDTO, metadata rollups.Metadata) (*UpdateToDoOutputDTO, error) {
+	res, err := u.ToDoRepository.UpdateToDo(&domain.ToDo{
 		Id:          input.Id,
 		Title:       input.Title,
 		Description: input.Description,
@@ -42,7 +42,7 @@ func (u *UpdateTodoUseCase) Execute(input *UpdateTodoInputDTO, metadata rollups.
 	if err != nil {
 		return nil, err
 	}
-	return &UpdateTodoOutputDTO{
+	return &UpdateToDoOutputDTO{
 		Id:          res.Id,
 		Title:       res.Title,
 		Description: res.Description,

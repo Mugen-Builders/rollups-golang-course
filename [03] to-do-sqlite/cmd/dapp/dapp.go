@@ -31,7 +31,7 @@ func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *
 		}
 		return router.Advance(decodedPayload, data.Metadata)
 	case "inspect_state":
-		return ih.TodoInspectHandlers.FindAllTodosHandler()
+		return ih.ToDoInspectHandlers.FindAllToDosHandler()
 	}
 	return nil
 }
@@ -65,9 +65,9 @@ func main() {
 
 	// Router setup and handlers registration
 	r := rollups.NewRouter()
-	r.HandleAdvance("create_todo", ah.TodoAdvanceHandlers.CreateTodoHandler)
-	r.HandleAdvance("update_todo", ah.TodoAdvanceHandlers.UpdateTodoHandler)
-	r.HandleAdvance("delete_todo", ah.TodoAdvanceHandlers.DeleteTodoHandler)
+	r.HandleAdvance("createToDo", ah.ToDoAdvanceHandlers.CreateToDoHandler)
+	r.HandleAdvance("updateToDo", ah.ToDoAdvanceHandlers.UpdateToDoHandler)
+	r.HandleAdvance("deleteToDo", ah.ToDoAdvanceHandlers.DeleteToDoHandler)
 	infolog.Println("Router setup successful")
 
 	// Polling loop ( Is there something new to process? )

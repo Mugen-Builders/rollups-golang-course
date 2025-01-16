@@ -24,6 +24,6 @@ sendInput() {
 }
 
 # Edit the payload before sending it.
-echo "Creating todo..."
-sendInput '{"path":"delete_todo","payload":{"id":1}}'
+echo "Creating To-Do..."
+sendInput '{"path":"createToDo","payload":{"title":"create a application","description":"Use the Cartesi Cli"}}'
 sleep 1
