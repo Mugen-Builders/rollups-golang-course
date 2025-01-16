@@ -62,7 +62,7 @@ curl 'http://localhost:8080/inspect/todos' \
     | jq
 ```
 
-> [!ALERT]
+> [!WARNING]
 > Proceed with the command below only when you are running the Cartesi Rollups infrastructure locally.
 
 **Step 11:** Access the Cartesi explorer to see all details and outputs for each input submitted:
