@@ -19,13 +19,13 @@ func NewTodoAdvanceHandlers(todoRepository domain.TodoRepository) *TodoAdvanceHa
 	}
 }
 
-func (h *TodoAdvanceHandlers) CreateTodoHandler(data *rollups.AdvanceResponse) error {
+func (h *TodoAdvanceHandlers) CreateTodoHandler(payload []byte, metadata rollups.Metadata) error {
 	var input usecase.CreateTodoInputDTO
-	if err := json.Unmarshal(data.Payload, &input); err != nil {
+	if err := json.Unmarshal(payload, &input); err != nil {
 		return err
 	}
 	createTodo := usecase.NewCreateTodoUseCase(h.TodoRepository)
-	res, err := createTodo.Execute(&input, data.Metadata)
+	res, err := createTodo.Execute(&input, metadata)
 	if err != nil {
 		return err
 	}
@@ -34,18 +34,18 @@ func (h *TodoAdvanceHandlers) CreateTodoHandler(data *rollups.AdvanceResponse) e
 		return err
 	}
 	rollups.SendNotice(&rollups.NoticeRequest{
-		Payload: fmt.Sprintf("todo created - %v", todo),
+		Payload: rollups.Str2Hex(fmt.Sprintf("todo created - %s", todo)),
 	})
 	return nil
 }
 
-func (h *TodoAdvanceHandlers) UpdateTodoHandler(data *rollups.AdvanceResponse) error {
+func (h *TodoAdvanceHandlers) UpdateTodoHandler(payload []byte, metadata rollups.Metadata) error {
 	var input usecase.UpdateTodoInputDTO
-	if err := json.Unmarshal(data.Payload, &input); err != nil {
+	if err := json.Unmarshal(payload, &input); err != nil {
 		return err
 	}
 	updateTodo := usecase.NewUpdateTodoUseCase(h.TodoRepository)
-	res, err := updateTodo.Execute(&input, data.Metadata)
+	res, err := updateTodo.Execute(&input, metadata)
 	if err != nil {
 		return err
 	}
@@ -54,14 +54,14 @@ func (h *TodoAdvanceHandlers) UpdateTodoHandler(data *rollups.AdvanceResponse) e
 		return err
 	}
 	rollups.SendNotice(&rollups.NoticeRequest{
-		Payload: fmt.Sprintf("todo updated - %v", todo),
+		Payload: rollups.Str2Hex(fmt.Sprintf("todo updated - %s", todo)),
 	})
 	return nil
 }
 
-func (h *TodoAdvanceHandlers) DeleteTodoHandler(data *rollups.AdvanceResponse) error {
+func (h *TodoAdvanceHandlers) DeleteTodoHandler(payload []byte, metadata rollups.Metadata) error {
 	var input usecase.DeleteTodoInputDTO
-	if err := json.Unmarshal(data.Payload, &input); err != nil {
+	if err := json.Unmarshal(payload, &input); err != nil {
 		return err
 	}
 	deleteTodo := usecase.NewDeleteTodoUseCase(h.TodoRepository)
@@ -74,7 +74,7 @@ func (h *TodoAdvanceHandlers) DeleteTodoHandler(data *rollups.AdvanceResponse) e
 		return err
 	}
 	rollups.SendNotice(&rollups.NoticeRequest{
-		Payload: fmt.Sprintf("todo deleted - %v", todo),
+		Payload: rollups.Str2Hex(fmt.Sprintf("todo deleted - %s", todo)),
 	})
 	return nil
 }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -23,7 +25,11 @@ func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *
 		if err := json.Unmarshal(response.Data, &data); err != nil {
 			return err
 		}
-		return router.Advance(&data)
+		decodedPayload, err := hex.DecodeString(data.Payload[2:])
+		if err != nil {
+			return fmt.Errorf("handler: error decoding payload: %w", err)
+		}
+		return router.Advance(decodedPayload, data.Metadata)
 	case "inspect_state":
 		return ih.TodoInspectHandlers.FindAllTodosHandler()
 	}

@@ -8,7 +8,6 @@ import (
 type CreateTodoInputDTO struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	CreatedAt   int64  `json:"created_at"`
 }
 
 type CreateTodoOutputDTO struct {

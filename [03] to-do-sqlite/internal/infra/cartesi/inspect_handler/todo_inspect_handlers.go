@@ -2,7 +2,6 @@ package inspect_handler
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/Mugen-Builders/to-do-sqlite/internal/domain"
 	"github.com/Mugen-Builders/to-do-sqlite/internal/usecase"
@@ -30,7 +29,7 @@ func (h *TodoInspectHandlers) FindAllTodosHandler() error {
 		return err
 	}
 	rollups.SendReport(&rollups.ReportRequest{
-		Payload: fmt.Sprintf("found all todos - %v", todos),
+		Payload: rollups.Str2Hex(string(todos)),
 	})
 	return nil
 }
