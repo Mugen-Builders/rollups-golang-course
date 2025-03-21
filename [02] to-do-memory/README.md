@@ -2,12 +2,12 @@
 
 **Step 1:** Compile/build the application:
 ```bash
-cartesi build
+cartesi rollups build
 ```
 
-**Step 2:** Run the application:
+**Step 2:** Start local infra:
 ```bash
-cartesi run
+cartesi rollups start
 ```
 
 **Step 3:** Grant execution permission to all scripts in the tools folder:

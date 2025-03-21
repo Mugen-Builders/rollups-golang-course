@@ -1,6 +1,6 @@
 ################################################################################
 # cross build stage
-FROM ubuntu:22.04 as build-stage
+FROM ubuntu:22.04 AS build-stage
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
@@ -41,15 +41,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
     CGO_ENABLED=1 GOARCH=riscv64 GOOS=linux CC=riscv64-linux-gnu-gcc go build -o /opt/build/dapp ./src
 
 # runtime stage: produces final image that will be executed
-FROM --platform=linux/riscv64 riscv64/ubuntu:22.04
-
-ARG MACHINE_EMULATOR_TOOLS_VERSION=0.14.1
-ADD https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb /
-RUN dpkg -i /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb \
-  && rm /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb
-
-LABEL io.cartesi.rollups.sdk_version=0.9.0
-LABEL io.cartesi.rollups.ram_size=128Mi
+FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
@@ -60,6 +52,11 @@ apt-get install -y --no-install-recommends \
 rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 useradd --create-home --user-group dapp
 EOF
+
+ARG MACHINE_EMULATOR_TOOLS_VERSION=0.16.1
+ADD https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb /
+RUN dpkg -i /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb \
+  && rm /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb
 
 ENV PATH="/opt/cartesi/bin:${PATH}"
 

@@ -1,7 +1,6 @@
-FROM golang:1.22.5-bookworm AS build
+FROM --platform=$BUILDPLATFORM golang:1.22.5-bookworm AS build
 WORKDIR /src
 
-# Install Go dependencies
 RUN apt-get update && apt-get install -y gcc g++-riscv64-linux-gnu
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
@@ -22,15 +21,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
     CGO_ENABLED=1 GOARCH=riscv64 GOOS=linux CC=riscv64-linux-gnu-gcc go build -o /bin/app ./cmd/dapp
 
 # runtime stage: produces final image that will be executed
-FROM --platform=linux/riscv64 riscv64/ubuntu:22.04 AS runtime
-
-ARG MACHINE_EMULATOR_TOOLS_VERSION=0.14.1
-ADD https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb /
-RUN dpkg -i /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb \
-  && rm /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb
-
-LABEL io.cartesi.rollups.sdk_version=0.9.0
-LABEL io.cartesi.rollups.ram_size=128Mi
+FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
@@ -42,16 +33,20 @@ rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 useradd --create-home --user-group dapp
 EOF
 
-WORKDIR /var/opt/cartesi-app
-
-# We need permission (write) to access the (linux) filesystem inside of the Cartesi Machine
-RUN chown -R dapp:dapp .
+ARG MACHINE_EMULATOR_TOOLS_VERSION=0.16.1
+ADD https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb /
+RUN dpkg -i /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb \
+  && rm /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb
 
 ENV PATH="/opt/cartesi/bin:${PATH}"
 
-ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"
-
+WORKDIR /var/opt/cartesi-app
 COPY --from=build /bin/app app
+
+# Change ownership of the application directory to the dapp user
+RUN chown -R dapp:dapp .
+
+ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"
 
 ENTRYPOINT ["rollup-init"]
 

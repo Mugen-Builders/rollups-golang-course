@@ -20,7 +20,7 @@ sendInput() {
         --chain-id=31337 \
         --mnemonic-index=0 \
         --rpc-url="$RPC_URL" \
-        --mnemonic-passphrase="test test test test test test test test test test test junk"
+        --mnemonic="test test test test test test test test test test test junk"
 }
 
 # Edit the payload before sending it.

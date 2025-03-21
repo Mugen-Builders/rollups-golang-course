@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	infolog = log.New(os.Stderr, "[ info ]  ", log.Lshortfile)
+	infolog = log.New(os.Stderr, "[ info ] ", log.Lshortfile)
 	errlog  = log.New(os.Stderr, "[ error ] ", log.Lshortfile)
 )
 
