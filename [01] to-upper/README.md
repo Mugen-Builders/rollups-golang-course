@@ -7,7 +7,7 @@ cartesi build
 
 **Step 2:** Start the local infrastructure:
 ```bash
-cartesi rollups start --services graphql
+cartesi rollups start
 ```
 
 **Step 3:** Send an input:
