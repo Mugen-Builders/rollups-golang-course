@@ -84,6 +84,9 @@ curl -X POST http://localhost:8080/inspect/<application> \
 ❯ cartesi send generic --input='{"path":"deleteToDo","payload":{"id":1}}' --input-encoding=string
 ```
 
+> [!NOTE]
+> Replace `<application>` with your application address (e.g., `0x9321e0dd59bad3ff98836bb83403e1598a0a4478`)
+
 **Step 11:** Final check — view and decode all current outputs:
 ```bash
 cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
