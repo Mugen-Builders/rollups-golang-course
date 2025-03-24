@@ -5,7 +5,7 @@ stringToHex() {
 }
 
 RPC_URL="http://localhost:8545"
-DAPP_ADDRESS="0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e"
+DAPP_ADDRESS="0x88a01bfb8b116dd77dd4bbffa2f6541b7a1e498b"
 
 sendInput() {
     local payload="$1"

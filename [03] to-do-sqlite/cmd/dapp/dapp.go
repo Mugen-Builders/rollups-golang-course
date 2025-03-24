@@ -10,6 +10,9 @@ import (
 	"strconv"
 
 	"github.com/Mugen-Builders/to-do-sqlite/configs"
+	"github.com/Mugen-Builders/to-do-sqlite/internal/infra/cartesi/advance_handler"
+	"github.com/Mugen-Builders/to-do-sqlite/internal/infra/cartesi/inspect_handler"
+	"github.com/Mugen-Builders/to-do-sqlite/internal/infra/repository"
 	"github.com/Mugen-Builders/to-do-sqlite/pkg/rollups"
 )
 
@@ -18,7 +21,7 @@ var (
 	errlog  = log.New(os.Stderr, "[ error ] ", log.Lshortfile)
 )
 
-func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *InspectHandlers) error {
+func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *inspect_handler.ToDoInspectHandlers) error {
 	switch response.Type {
 	case "advance_state":
 		var data rollups.AdvanceResponse
@@ -31,7 +34,7 @@ func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *
 		}
 		return router.Advance(decodedPayload, data.Metadata)
 	case "inspect_state":
-		return ih.ToDoInspectHandlers.FindAllToDosHandler()
+		return ih.FindAllToDosHandler()
 	}
 	return nil
 }
@@ -50,14 +53,16 @@ func main() {
 	}
 	defer sqlDB.Close()
 
-	// Dependency injection with Wire ( It could be done with others libraries like dig, fx, etc )
-	ah, err := NewAdvanceHandlers(db)
+	// Dependency injection
+	toDoRepository := repository.NewToDoRepositorySQLite(db)
+
+	ah := advance_handler.NewToDoAdvanceHandlers(toDoRepository)
 	if err != nil {
 		errlog.Panicln("Failed to initialize advance handlers", "error", err)
 	}
 	infolog.Println("Advance handlers initialized")
 
-	ih, err := NewInspectHandlers(db)
+	ih := inspect_handler.NewToDoInspectHandlers(toDoRepository)
 	if err != nil {
 		errlog.Panicln("Failed to initialize inspect handlers", "error", err)
 	}
@@ -65,9 +70,9 @@ func main() {
 
 	// Router setup and handlers registration
 	r := rollups.NewRouter()
-	r.HandleAdvance("createToDo", ah.ToDoAdvanceHandlers.CreateToDoHandler)
-	r.HandleAdvance("updateToDo", ah.ToDoAdvanceHandlers.UpdateToDoHandler)
-	r.HandleAdvance("deleteToDo", ah.ToDoAdvanceHandlers.DeleteToDoHandler)
+	r.HandleAdvance("createToDo", ah.CreateToDoHandler)
+	r.HandleAdvance("updateToDo", ah.UpdateToDoHandler)
+	r.HandleAdvance("deleteToDo", ah.DeleteToDoHandler)
 	infolog.Println("Router setup successful")
 
 	// Polling loop ( Is there something new to process? )

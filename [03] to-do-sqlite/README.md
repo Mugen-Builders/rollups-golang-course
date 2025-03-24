@@ -5,29 +5,43 @@
 cartesi build
 ```
 
-**Step 2:** Run the application:
+**Step 2:** Start the local infrastructure:
 ```bash
-cartesi run
+cartesi rollups start --services graphql
 ```
 
-**Step 3:** Grant execution permission to all scripts in the tools folder:
+**Step 3:** Create a new To-Do item:
 ```bash
-chmod +x ./tools/*.sh
+❯ cartesi send generic --input='{"path":"createToDo","payload":{"title":"Create an application","description":"Use the Cartesi CLI"}}' --input-encoding=string
 ```
 
-**Step 4:** Create a new To-Do item:
+> [!NOTE]
+> Replace `<application>` with your application address (e.g., `0x9321e0dd59bad3ff98836bb83403e1598a0a4478`)
+
+**Step 4:** View and decode all outputs:
 ```bash
-./tools/create_to_do.sh
+cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
+  '{"application":"<application>","limit":1,"offset":0,"decode":true}' \
+| jq -r '.data[]?.decoded_data.payload' \
+| while read -r hex; do
+    if [ "$hex" != "null" ]; then
+        echo "$hex" | sed 's/^0x//' | xxd -r -p
+        echo
+    fi
+done
 ```
 
 **Step 5:** Inspect all To-Dos (raw output via `jq`):
 ```bash
-curl 'http://localhost:8080/inspect/todos' | jq
+curl -X POST http://localhost:8080/inspect/<application> \
+    -H "Content-Type: application/json" | jq
 ```
 
-**Step 6:** Inspect all To-Dos (decoded payload):
+
+**Step 6:** Inspect all To-Dos (decoded payloads):
 ```bash
-curl 'http://localhost:8080/inspect/todos' \
+curl -X POST http://localhost:8080/inspect/<application> \
+    -H "Content-Type: application/json" \
     | jq -r '.reports[0].payload' \
     | sed 's/^0x//' \
     | xxd -r -p \
@@ -36,40 +50,54 @@ curl 'http://localhost:8080/inspect/todos' \
 
 **Step 7:** Update an existing To-Do item:
 ```bash
-./tools/update_to_do.sh
+❯ cartesi send generic --input='{"path":"updateToDo","payload":{"id":1,"title":"Create an application","description":"Use the Cartesi CLI","completed":true}}' --input-encoding=string
 ```
 
-**Step 8:** Inspect all To-Dos (decoded payload) again to confirm changes:
+> [!NOTE]
+> Replace `<application>` with your application address (e.g., `0x9321e0dd59bad3ff98836bb83403e1598a0a4478`)
+
+**Step 8:** View and decode all outputs again to confirm the update:
 ```bash
-curl 'http://localhost:8080/inspect/todos' \
+cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
+  '{"application":"<application>","limit":2,"offset":0,"decode":true}' \
+| jq -r '.data[]?.decoded_data.payload' \
+| while read -r hex; do
+    if [ "$hex" != "null" ]; then
+        echo "$hex" | sed 's/^0x//' | xxd -r -p
+        echo
+    fi
+done
+```
+
+**Step 9:** Inspect all To-Dos (decoded payloads):
+```bash
+curl -X POST http://localhost:8080/inspect/<application> \
+    -H "Content-Type: application/json" \
     | jq -r '.reports[0].payload' \
     | sed 's/^0x//' \
     | xxd -r -p \
     | jq
 ```
 
-**Step 9:** Delete a To-Do item:
+**Step 10:** Delete a To-Do item:
 ```bash
-./tools/delete_to_do.sh
+❯ cartesi send generic --input='{"path":"deleteToDo","payload":{"id":1}}' --input-encoding=string
 ```
 
-**Step 10:** Inspect all To-Dos (decoded payload) one more time:
+**Step 11:** Final check — view and decode all current outputs:
 ```bash
-curl 'http://localhost:8080/inspect/todos' \
-    | jq -r '.reports[0].payload' \
-    | sed 's/^0x//' \
-    | xxd -r -p \
-    | jq
+cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
+  '{"application":"<application>","limit":2,"offset":0,"decode":true}' \
+| jq -r '.data[]?.decoded_data.payload' \
+| while read -r hex; do
+    if [ "$hex" != "null" ]; then
+        echo "$hex" | sed 's/^0x//' | xxd -r -p
+        echo
+    fi
+done
 ```
 
-> [!WARNING]
-> Proceed with the command below only when you are running the Cartesi Rollups infrastructure locally.
-
-**Step 11:** Access the Cartesi explorer to see all details and outputs for each input submitted:
-<br>
-
-
-[![Docs]][Link-docs]
-
-[Docs]: https://img.shields.io/badge/Cartesi-Explorer-79F7FA?style=for-the-badge
-[Link-docs]: http://localhost:8080/explorer
+**Step 12:** Stop the local infrastructure:
+```bash
+cartesi rollups stop
+```

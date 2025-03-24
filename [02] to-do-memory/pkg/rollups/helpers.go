@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 )
 
-var rollup_server = os.Getenv("ROLLUP_HTTP_SERVER_URL")
+var (
+	rollup_server = os.Getenv("ROLLUP_HTTP_SERVER_URL")
+	infolog       = log.New(os.Stderr, "[ info ] ", log.Lshortfile)
+)
 
 func SendPost(endpoint string, jsonData []byte) (*http.Response, error) {
 	req, err := http.NewRequest(http.MethodPost, rollup_server+"/"+endpoint, bytes.NewBuffer(jsonData))
@@ -16,7 +20,7 @@ func SendPost(endpoint string, jsonData []byte) (*http.Response, error) {
 		return &http.Response{}, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
+	infolog.Printf("Sending request to %s/%s body %v", rollup_server, endpoint, string(jsonData))
 	return http.DefaultClient.Do(req)
 }
 

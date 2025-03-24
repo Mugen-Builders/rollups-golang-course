@@ -5,7 +5,7 @@ stringToHex() {
 }
 
 RPC_URL="http://localhost:8545"
-DAPP_ADDRESS="0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e"
+DAPP_ADDRESS="0xf879c61f11639116fa1d932aacaaaf97c4f56b8a"
 
 sendInput() {
     local payload="$1"
@@ -19,7 +19,7 @@ sendInput() {
         --dapp="$DAPP_ADDRESS" \
         --chain-id=31337 \
         --mnemonic-index=0 \
-        --rpc-url="$RPC_URL" \
+        --rpc-url="http://127.0.0.1:8545" \
         --mnemonic="test test test test test test test test test test test junk"
 }
 

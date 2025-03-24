@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -22,7 +22,12 @@ func HandleAdvance(data *rollups.AdvanceResponse) error {
 	if err != nil {
 		return fmt.Errorf("HandleAdvance: failed marshaling json: %w", err)
 	}
-	infolog.Println("Received advance request data", string(dataMarshal))
+	decodedPayload, err := hex.DecodeString(data.Payload[2:])
+	if err != nil {
+		return fmt.Errorf("Handler: Error decoding payload: %w", err)
+	}
+	data.Payload = strings.ToUpper(string(decodedPayload))
+	infolog.Println("To-Upper input:", string(dataMarshal))
 	return nil
 }
 
@@ -41,15 +46,9 @@ func Handler(response *rollups.FinishResponse) error {
 	switch response.Type {
 	case "advance_state":
 		data := new(rollups.AdvanceResponse)
-
 		if err := json.Unmarshal(response.Data, data); err != nil {
 			return fmt.Errorf("Handler: Error unmarshaling advance: %w", err)
 		}
-		decodedPayload, err := hex.DecodeString(data.Payload[2:])
-		if err != nil {
-			return fmt.Errorf("Handler: Error decoding payload: %w", err)
-		}
-		data.Payload = strings.ToUpper(string(decodedPayload))
 		HandleAdvance(data)
 	case "inspect_state":
 		data := new(rollups.InspectResponse)
@@ -64,7 +63,7 @@ func Handler(response *rollups.FinishResponse) error {
 func main() {
 	finish := rollups.FinishRequest{"accept"}
 
-	for true {
+	for {
 		infolog.Println("Sending finish")
 		res, err := rollups.SendFinish(&finish)
 		if err != nil {
@@ -76,7 +75,7 @@ func main() {
 			infolog.Println("No pending rollup request, trying again")
 		} else {
 
-			resBody, err := ioutil.ReadAll(res.Body)
+			resBody, err := io.ReadAll(res.Body)
 			if err != nil {
 				errlog.Panicln("Error: could not read response body: ", err)
 			}
