@@ -18,16 +18,12 @@ var (
 )
 
 func HandleAdvance(data *rollups.AdvanceResponse) error {
-	dataMarshal, err := json.Marshal(data)
-	if err != nil {
-		return fmt.Errorf("HandleAdvance: failed marshaling json: %w", err)
-	}
 	decodedPayload, err := hex.DecodeString(data.Payload[2:])
 	if err != nil {
 		return fmt.Errorf("Handler: Error decoding payload: %w", err)
 	}
 	data.Payload = strings.ToUpper(string(decodedPayload))
-	infolog.Println("To-Upper input:", string(dataMarshal))
+	infolog.Println("To-Upper:", string(data.Payload))
 	return nil
 }
 
