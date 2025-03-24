@@ -12,7 +12,7 @@ cartesi rollups start
 
 **Step 3:** Send an input:
 ```bash
-❯ cartesi send generic --input='cartesi is awesome!' --input-encoding=string
+cartesi send generic --input='cartesi is awesome!' --input-encoding=string
 ```
 
 > [!NOTE]

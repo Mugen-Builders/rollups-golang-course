@@ -12,7 +12,7 @@ cartesi rollups start --services graphql
 
 **Step 3:** Create a new To-Do item:
 ```bash
-❯ cartesi send generic --input='{"path":"createToDo","payload":{"title":"Create an application","description":"Use the Cartesi CLI"}}' --input-encoding=string
+cartesi send generic --input='{"path":"createToDo","payload":{"title":"Create an application","description":"Use the Cartesi CLI"}}' --input-encoding=string
 ```
 
 > [!NOTE]
@@ -68,7 +68,7 @@ curl -X POST http://localhost:8080/inspect/<application> \
 
 **Step 7:** Update an existing To-Do item:
 ```bash
-❯ cartesi send generic --input='{"path":"updateToDo","payload":{"id":1,"title":"Create an application","description":"Use the Cartesi CLI","completed":true}}' --input-encoding=string
+cartesi send generic --input='{"path":"updateToDo","payload":{"id":1,"title":"Create an application","description":"Use the Cartesi CLI","completed":true}}' --input-encoding=string
 ```
 
 > [!NOTE]
@@ -117,7 +117,7 @@ curl -X POST http://localhost:8080/inspect/<application> \
 
 **Step 10:** Delete a To-Do item:
 ```bash
-❯ cartesi send generic --input='{"path":"deleteToDo","payload":{"id":1}}' --input-encoding=string
+cartesi send generic --input='{"path":"deleteToDo","payload":{"id":1}}' --input-encoding=string
 ```
 
 > [!NOTE]
