@@ -107,7 +107,7 @@ curl -s -X POST http://localhost:8080/graphql \
 
 **Step 9:** Inspect all To-Dos (decoded payloads):
 ```bash
-curl -X POST http://localhost:8080/inspect/0x9321e0dd59bad3ff98836bb83403e1598a0a4478 \
+curl -X POST http://localhost:8080/inspect/<application> \
     -H "Content-Type: application/json" \
     | jq -r '.reports[0].payload' \
     | sed 's/^0x//' \
