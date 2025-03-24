@@ -17,13 +17,22 @@ var (
 	errlog  = log.New(os.Stderr, "[ error ] ", log.Lshortfile)
 )
 
+var lastestState string
+
 func HandleAdvance(data *rollups.AdvanceResponse) error {
+	dataMarshal, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("HandleAdvance: failed marshaling json: %w", err)
+	}
+	infolog.Println("Received advance request data", string(dataMarshal))
+
+	// To-Upper
 	decodedPayload, err := hex.DecodeString(data.Payload[2:])
 	if err != nil {
 		return fmt.Errorf("Handler: Error decoding payload: %w", err)
 	}
-	data.Payload = strings.ToUpper(string(decodedPayload))
-	infolog.Println("To-Upper:", string(data.Payload))
+	lastestState = strings.ToUpper(string(decodedPayload))
+	infolog.Println("To-Upper:", lastestState)
 	return nil
 }
 
@@ -33,6 +42,9 @@ func HandleInspect(data *rollups.InspectResponse) error {
 		return fmt.Errorf("HandleInspect: failed marshaling json: %w", err)
 	}
 	infolog.Println("Received inspect request data", string(dataMarshal))
+	rollups.SendReport(&rollups.ReportRequest{
+		Payload: rollups.Str2Hex(lastestState),
+	})
 	return nil
 }
 
