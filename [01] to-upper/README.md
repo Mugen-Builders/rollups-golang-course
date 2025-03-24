@@ -7,7 +7,7 @@ cartesi build
 
 **Step 2:** Start the local infrastructure:
 ```bash
-cartesi rollups start
+cartesi rollups start --services graphql
 ```
 
 **Step 3:** Send an input:
@@ -18,20 +18,20 @@ cartesi rollups start
 > [!NOTE]
 > Replace `<application>` with your application address (e.g., `0x9321e0dd59bad3ff98836bb83403e1598a0a4478`)
 
-**Step 5:** Inspect last transformed input (raw output via `jq`):
+**Step 4:** Inspect last transformed input (raw output via `jq`):
 ```bash
 curl -X POST http://localhost:8080/inspect/<application> \
     -H "Content-Type: application/json" | jq
 ```
 
-**Step 6:** Inspect last transformed input (decoded):
+**Step 5:** Inspect last transformed input (decoded):
 ```bash
 curl -X POST http://localhost:8080/inspect/<application> \
     -H "Content-Type: application/json" \
     | jq -r '.reports[0].payload' \
 ```
 
-**Step 7:** Stop the local infrastructure:
+**Step 6:** Stop the local infrastructure:
 ```bash
 cartesi rollups stop
 ```
