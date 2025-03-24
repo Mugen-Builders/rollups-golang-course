@@ -29,7 +29,7 @@ func NewCreateToDoUseCase(todoRepository domain.ToDoRepository) *CreateToDoUseCa
 }
 
 func (u *CreateToDoUseCase) Execute(input *CreateToDoInputDTO, metadata rollups.Metadata) (*CreateToDoOutputDTO, error) {
-	res, err := domain.NewToDo(input.Title, input.Description, metadata.Timestamp)
+	res, err := domain.NewToDo(input.Title, input.Description, metadata.BlockTimestamp)
 	if err != nil {
 		return nil, err
 	}

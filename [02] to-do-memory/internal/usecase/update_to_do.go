@@ -37,7 +37,7 @@ func (u *UpdateToDoUseCase) Execute(input *UpdateToDoInputDTO, metadata rollups.
 		Title:       input.Title,
 		Description: input.Description,
 		Completed:   input.Completed,
-		UpdatedAt:   metadata.Timestamp,
+		UpdatedAt:   metadata.BlockTimestamp,
 	})
 	if err != nil {
 		return nil, err
