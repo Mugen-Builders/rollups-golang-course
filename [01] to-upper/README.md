@@ -24,14 +24,7 @@ curl -X POST http://localhost:8080/inspect/<application> \
     -H "Content-Type: application/json" | jq
 ```
 
-**Step 5:** Inspect last transformed input (decoded):
-```bash
-curl -X POST http://localhost:8080/inspect/<application> \
-    -H "Content-Type: application/json" \
-    | jq -r '.reports[0].payload' \
-```
-
-**Step 6:** Stop the local infrastructure:
+**Step 5:** Stop the local infrastructure:
 ```bash
 cartesi rollups stop
 ```
