@@ -12,7 +12,7 @@ cartesi rollups start --services graphql
 
 **Step 3:** Create a new To-Do item:
 ```bash
-cartesi send generic --input='{"path":"createToDo","payload":{"title":"Create an application","description":"Use the Cartesi CLI"}}' --input-encoding=string
+cartesi send generic --input='{"path":"create_todo","payload":{"title":"Create an application","description":"Use the Cartesi CLI"}}' --input-encoding=string
 ```
 
 > [!NOTE]
@@ -68,7 +68,7 @@ curl -X POST http://localhost:8080/inspect/<application> \
 
 **Step 7:** Update an existing To-Do item:
 ```bash
-cartesi send generic --input='{"path":"updateToDo","payload":{"id":1,"title":"Create an application","description":"Use the Cartesi CLI","completed":true}}' --input-encoding=string
+cartesi send generic --input='{"path":"update_todo","payload":{"id":1,"title":"Update the application","description":"Use the Cartesi CLI to create rollups","completed":true}}' --input-encoding=string
 ```
 
 > [!NOTE]
@@ -117,7 +117,7 @@ curl -X POST http://localhost:8080/inspect/<application> \
 
 **Step 10:** Delete a To-Do item:
 ```bash
-cartesi send generic --input='{"path":"deleteToDo","payload":{"id":1}}' --input-encoding=string
+cartesi send generic --input='{"path":"delete_todo","payload":{"id":1}}' --input-encoding=string
 ```
 
 > [!NOTE]
@@ -126,7 +126,7 @@ cartesi send generic --input='{"path":"deleteToDo","payload":{"id":1}}' --input-
 **Step 11:** Final check — view and decode all current outputs:
 ```bash
 cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
-  '{"application":"<application>","limit":2,"offset":0,"decode":true}' \
+  '{"application":"<application>","limit":3,"offset":0,"decode":true}' \
 | jq -r '.data[]?.decoded_data.payload' \
 | while read -r hex; do
     if [ "$hex" != "null" ]; then
