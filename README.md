@@ -15,7 +15,7 @@
 </p>
 
 ## Syllabus:
-| Lesson      | Content                                | Reference                     |
+| Project      | Content                                | Reference                     |
 |-------------|----------------------------------------|-------------------------------|
 | **01**    | How to start a Cartesi project, how the basic IO flow works, the types of internal interfaces your dApp can interact with, and how to use the Cartesi Explorer during your application's development. | [README](./[01]%20to-upper/README.md) |
 | **02**    | First in-depth look at the architecture behind your application. How to customize it by implementing business logic, using libraries that have stood the test of time in the software development ecosystem. | [README](./[02]%20to-do-memory/README.md) |
