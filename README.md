@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://github.com/Mugen-Builders/.github/assets/153661799/7ed08d4c-89f4-4bde-a635-0b332affbd5d" width="150" height="150">
+<img src="https://github.com/user-attachments/assets/fb32df6e-1775-43b7-a69b-7b50a10bf6b8" width="150" height="150">
 </div>
 <br>
 <div align="center">
