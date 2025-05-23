@@ -7,7 +7,7 @@ cartesi build
 
 **Step 2:** Start the local infrastructure:
 ```bash
-cartesi rollups start --services graphql
+cartesi rollups start
 ```
 
 **Step 3:** Create a new To-Do item:
@@ -31,30 +31,11 @@ cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
 done
 ```
 
-**Alternative with GraphQL:**
-```bash
-curl -s -X POST http://localhost:8080/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query":"query { notices(last: 1) { edges { node { payload application { name } } } } }"}' \
-| jq -r '
-  .data.notices.edges[0].node.payload,
-  .data.notices.edges[0].node.application.name
-' | {
-  read hex
-  read appname
-  echo "Application Name: $appname"
-  echo -n "Notice Payload: "
-  echo "$hex" | sed 's/^0x//' | xxd -r -p
-  echo
-}
-```
-
 **Step 5:** Inspect all To-Dos (raw output via `jq`):
 ```bash
 curl -X POST http://localhost:8080/inspect/<application> \
     -H "Content-Type: application/json" | jq
 ```
-
 
 **Step 6:** Inspect all To-Dos (decoded payloads):
 ```bash
@@ -87,24 +68,6 @@ cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
 done
 ```
 
-**Alternative with GraphQL:**
-```bash
-curl -s -X POST http://localhost:8080/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query":"query { notices(last: 1) { edges { node { payload application { name } } } } }"}' \
-| jq -r '
-  .data.notices.edges[0].node.payload,
-  .data.notices.edges[0].node.application.name
-' | {
-  read hex
-  read appname
-  echo "Application Name: $appname"
-  echo -n "Notice Payload: "
-  echo "$hex" | sed 's/^0x//' | xxd -r -p
-  echo
-}
-```
-
 **Step 9:** Inspect all To-Dos (decoded payloads):
 ```bash
 curl -X POST http://localhost:8080/inspect/<application> \
@@ -134,24 +97,6 @@ cast rpc --raw --rpc-url http://127.0.0.1:8080/rpc cartesi_listOutputs \
         echo
     fi
 done
-```
-
-**Alternative with GraphQL:**
-```bash
-curl -s -X POST http://localhost:8080/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query":"query { notices(last: 1) { edges { node { payload application { name } } } } }"}' \
-| jq -r '
-  .data.notices.edges[0].node.payload,
-  .data.notices.edges[0].node.application.name
-' | {
-  read hex
-  read appname
-  echo "Application Name: $appname"
-  echo -n "Notice Payload: "
-  echo "$hex" | sed 's/^0x//' | xxd -r -p
-  echo
-}
 ```
 
 **Step 12:** Stop the local infrastructure:
