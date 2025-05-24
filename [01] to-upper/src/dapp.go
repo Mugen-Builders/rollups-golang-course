@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dapp/src/rollups"
+	"dapp/rollups"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"

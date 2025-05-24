@@ -2,6 +2,8 @@
 
 # This enforces that the packages downloaded from the repositories are the same
 # for the defined date, no matter when the image is built.
+
+ARG APP_NAME=verifier
 ARG UBUNTU_TAG=noble-20250404
 ARG APT_UPDATE_SNAPSHOT=20250424T030400Z
 
@@ -27,13 +29,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 set -eu
 apt-get update
-apt-get install -y --no-install-recommends ca-certificates curl
+apt-get install -y --no-install-recommends ca-certificates curl gcc g++-riscv64-linux-gnu
 apt-get update --snapshot=${APT_UPDATE_SNAPSHOT}
 EOF
 
 ################################################################################
 # cross build stage
 FROM base-cross AS cross-build-stage
+ARG APP_NAME
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
@@ -44,7 +47,7 @@ apt-get install -y --no-install-recommends \
     g++-riscv64-linux-gnu
 EOF
 
-ARG GOVERSION=1.23.2
+ARG GOVERSION=1.23.0
 
 WORKDIR /opt/build
 
@@ -57,9 +60,22 @@ ENV CGO_ENABLED=1
 ENV CC=riscv64-linux-gnu-gcc
 ENV PATH=/usr/local/go/bin:${PATH}
 
-COPY src .
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /go/pkg/mod/ to speed up subsequent builds.
+# Leverage bind mounts to go.sum and go.mod to avoid having to copy them into
+# the container.
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    --mount=type=bind,source=./go.sum,target=./go.sum \
+    --mount=type=bind,source=./go.mod,target=./go.mod \
+    go mod download -x
 
-RUN make
+# Build the application.
+# Leverage a cache mount to /go/pkg/mod/ to speed up subsequent builds.
+# Leverage a bind mount to the current directory to avoid having to copy the
+# source code into the container.
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    --mount=type=bind,target=. \
+    CGO_ENABLED=1 GOARCH=riscv64 GOOS=linux CC=riscv64-linux-gnu-gcc go build -o /bin/dapp ./cmd
 
 ################################################################################
 # runtime stage: produces final image that will be executed
@@ -83,12 +99,16 @@ rm /tmp/machine-guest-tools_riscv64.deb
 rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 EOF
 
-ENV PATH="/opt/cartesi/bin:${PATH}"
-
 WORKDIR /opt/cartesi/dapp
-COPY --from=cross-build-stage /opt/build/dapp .
+
+RUN chown -R dapp:dapp /opt/cartesi/dapp
+
+COPY --from=cross-build-stage /bin/dapp .
 
 ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"
 
+ENV PATH="/opt/cartesi/bin:${PATH}"
+
 ENTRYPOINT ["rollup-init"]
+
 CMD ["/opt/cartesi/dapp/dapp"]
