@@ -3,7 +3,7 @@ package sqlite
 import (
 	"fmt"
 
-	"github.com/henriquemarlon/to-do/internal/domain"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/domain"
 	"gorm.io/gorm"
 )
 

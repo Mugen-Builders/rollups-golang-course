@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	. "github.com/henriquemarlon/to-do/internal/infra/repository"
-	"github.com/henriquemarlon/to-do/internal/infra/repository/in_memory"
-	"github.com/henriquemarlon/to-do/internal/infra/repository/sqlite"
+	. "github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/repository"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/repository/in_memory"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/repository/sqlite"
 )
 
 // NewRepositoryFromConnectionString chooses the backend based on the connection string.

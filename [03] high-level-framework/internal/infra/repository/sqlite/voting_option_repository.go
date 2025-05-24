@@ -9,7 +9,7 @@ func (r *SQLiteRepository) CreateOption(option *domain.VotingOption) error {
 	return r.db.Create(option).Error
 }
 
-func (r *SQLiteRepository) GetOptionByID(id int) (*domain.VotingOption, error) {
+func (r *SQLiteRepository) FindOptionByID(id int) (*domain.VotingOption, error) {
 	var option domain.VotingOption
 	err := r.db.First(&option, id).Error
 	if err != nil {
@@ -18,7 +18,7 @@ func (r *SQLiteRepository) GetOptionByID(id int) (*domain.VotingOption, error) {
 	return &option, nil
 }
 
-func (r *SQLiteRepository) GetOptionsByVotingID(votingID int) ([]*domain.VotingOption, error) {
+func (r *SQLiteRepository) FindAllOptionsByVotingID(votingID int) ([]*domain.VotingOption, error) {
 	var options []*domain.VotingOption
 	err := r.db.Where("voting_id = ?", votingID).Find(&options).Error
 	if err != nil {

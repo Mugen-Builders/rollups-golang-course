@@ -8,7 +8,7 @@ func (r *SQLiteRepository) CreateVoter(voter *domain.Voter) error {
 	return r.db.Create(voter).Error
 }
 
-func (r *SQLiteRepository) GetVoterByID(id int) (*domain.Voter, error) {
+func (r *SQLiteRepository) FindVoterByID(id int) (*domain.Voter, error) {
 	var voter domain.Voter
 	err := r.db.First(&voter, id).Error
 	if err != nil {
@@ -17,7 +17,7 @@ func (r *SQLiteRepository) GetVoterByID(id int) (*domain.Voter, error) {
 	return &voter, nil
 }
 
-func (r *SQLiteRepository) GetVoterByAddress(address string) (*domain.Voter, error) {
+func (r *SQLiteRepository) FindVoterByAddress(address string) (*domain.Voter, error) {
 	var voter domain.Voter
 	err := r.db.Where("address = ?", address).First(&voter).Error
 	if err != nil {

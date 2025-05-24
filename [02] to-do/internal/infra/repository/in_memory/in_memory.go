@@ -3,7 +3,7 @@ package in_memory
 import (
 	"sync"
 
-	"github.com/henriquemarlon/to-do/internal/domain"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/domain"
 )
 
 type InMemoryRepository struct {

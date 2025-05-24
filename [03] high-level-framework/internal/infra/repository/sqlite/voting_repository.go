@@ -8,7 +8,7 @@ func (r *SQLiteRepository) CreateVoting(voting *domain.Voting) error {
 	return r.db.Create(voting).Error
 }
 
-func (r *SQLiteRepository) GetVotingByID(id int) (*domain.Voting, error) {
+func (r *SQLiteRepository) FindVotingByID(id int) (*domain.Voting, error) {
 	var voting domain.Voting
 	err := r.db.First(&voting, id).Error
 	if err != nil {
@@ -17,7 +17,7 @@ func (r *SQLiteRepository) GetVotingByID(id int) (*domain.Voting, error) {
 	return &voting, nil
 }
 
-func (r *SQLiteRepository) ListVotings() ([]*domain.Voting, error) {
+func (r *SQLiteRepository) FindAllVotings() ([]*domain.Voting, error) {
 	var votings []*domain.Voting
 	err := r.db.Find(&votings).Error
 	if err != nil {
@@ -34,7 +34,7 @@ func (r *SQLiteRepository) DeleteVoting(id int) error {
 	return r.db.Delete(&domain.Voting{}, id).Error
 }
 
-func (r *SQLiteRepository) ListActiveVotings() ([]*domain.Voting, error) {
+func (r *SQLiteRepository) FindAllActiveVotings() ([]*domain.Voting, error) {
 	var votings []*domain.Voting
 	err := r.db.Where("status = ?", domain.VotingStatusOpen).Find(&votings).Error
 	if err != nil {

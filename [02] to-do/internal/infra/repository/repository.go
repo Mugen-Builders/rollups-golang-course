@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/henriquemarlon/to-do/internal/domain"
+import "github.com/henriquemarlon/cartesi-golang-series/to-do/internal/domain"
 
 type ToDoRepository interface {
 	CreateToDo(toDo *domain.ToDo) (*domain.ToDo, error)

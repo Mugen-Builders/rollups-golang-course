@@ -1,7 +1,7 @@
 package in_memory
 
 import (
-	"github.com/henriquemarlon/to-do/internal/domain"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/domain"
 )
 
 func (r *InMemoryRepository) CreateToDo(input *domain.ToDo) (*domain.ToDo, error) {
