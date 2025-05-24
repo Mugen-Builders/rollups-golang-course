@@ -1,0 +1,45 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+permissions:
+  contents: read
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [
+          "[01] to-upper",
+          "[02] to-do",
+          # "[03] high-level-framework",
+          # "[04] asset-handling",
+          # "[05] alt-da",
+          # "[06] auction"
+        ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: current
+
+      - name: Install Cartesi CLI
+        run: npm install -g @cartesi/cli@2.0.0-alpha.8
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Check system requirements
+        run: cartesi doctor
+
+      - name: Build ${{ matrix.project }}
+        run: cartesi build
+        working-directory: ${{ matrix.project }}

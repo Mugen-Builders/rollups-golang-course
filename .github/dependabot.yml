@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directories:
+      - "/[01] to-upper"
+      - "/[02] to-do"
+      # - "/[03] high-level-framework"
+      # - "/[04] asset-handling"
+      # - "/[05] alt-da"
+      # - "/[06] auction"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "docker" 
