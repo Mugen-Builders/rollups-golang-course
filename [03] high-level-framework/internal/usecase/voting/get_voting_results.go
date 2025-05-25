@@ -1,0 +1,49 @@
+package voting
+
+import (
+	"context"
+
+	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
+)
+
+type GetVotingResultsInputDTO struct {
+	VotingID int `json:"voting_id"`
+}
+
+type VotingOptionResultDTO struct {
+	OptionID    int    `json:"option_id"`
+	Description string `json:"description"`
+	VoteCount   int    `json:"vote_count"`
+}
+
+type GetVotingResultsOutputDTO struct {
+	VotingID int                     `json:"voting_id"`
+	Results  []VotingOptionResultDTO `json:"results"`
+}
+
+type GetVotingResultsUseCase struct {
+	VotingOptionRepository repository.VotingOptionRepository
+}
+
+func NewGetVotingResultsUseCase(optionRepo repository.VotingOptionRepository) *GetVotingResultsUseCase {
+	return &GetVotingResultsUseCase{VotingOptionRepository: optionRepo}
+}
+
+func (uc *GetVotingResultsUseCase) Execute(ctx context.Context, input *GetVotingResultsInputDTO) (*GetVotingResultsOutputDTO, error) {
+	options, err := uc.VotingOptionRepository.FindAllOptionsByVotingID(input.VotingID)
+	if err != nil {
+		return nil, err
+	}
+	results := make([]VotingOptionResultDTO, 0, len(options))
+	for _, opt := range options {
+		results = append(results, VotingOptionResultDTO{
+			OptionID:    opt.ID,
+			Description: opt.Description,
+			VoteCount:   opt.VoteCount,
+		})
+	}
+	return &GetVotingResultsOutputDTO{
+		VotingID: input.VotingID,
+		Results:  results,
+	}, nil
+}

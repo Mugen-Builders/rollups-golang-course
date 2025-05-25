@@ -104,6 +104,23 @@ done
 cartesi rollups stop
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Voting System Use Cases
 
 ## 1. Voter Management
