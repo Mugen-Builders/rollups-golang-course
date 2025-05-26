@@ -2,10 +2,12 @@ package voting
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 )
 
 type CreateVotingInputDTO struct {
@@ -17,6 +19,7 @@ type CreateVotingInputDTO struct {
 type CreateVotingOutputDTO struct {
 	Id        int       `json:"id"`
 	Title     string    `json:"title"`
+	Creator   Address   `json:"creator"`
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
 }
@@ -30,12 +33,15 @@ func NewCreateVotingUseCase(votingRepository repository.VotingRepository) *Creat
 }
 
 func (uc *CreateVotingUseCase) Execute(ctx context.Context, input *CreateVotingInputDTO) (*CreateVotingOutputDTO, error) {
-	voting := &domain.Voting{
-		Title:     input.Title,
-		StartDate: input.StartDate,
-		EndDate:   input.EndDate,
+	msgSender, ok := ctx.Value("msg_sender").(string)
+	if !ok {
+		return nil, errors.New("error getting msg_sender")
 	}
-	err := uc.VotingRepository.CreateVoting(voting)
+	voting, err := domain.NewVoting(input.Title, HexToAddress(msgSender), input.StartDate, input.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	err = uc.VotingRepository.CreateVoting(voting)
 	if err != nil {
 		return nil, err
 	}

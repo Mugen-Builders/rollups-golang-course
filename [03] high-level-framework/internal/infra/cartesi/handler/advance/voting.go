@@ -20,12 +20,13 @@ func NewVotingAdvanceHandlers(votingRepository repository.VotingRepository) *Vot
 	}
 }
 
-func (h *VotingAdvanceHandlers) CreateVoting(env rollmelette.Env, payload []byte) error {
+func (h *VotingAdvanceHandlers) CreateVoting(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
 	var input voting.CreateVotingInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
 	ctx := context.Background()
+	ctx = context.WithValue(ctx, "msg_sender", metadata.MsgSender)
 	createVoting := voting.NewCreateVotingUseCase(h.VotingRepository)
 	res, err := createVoting.Execute(ctx, &input)
 	if err != nil {
@@ -39,7 +40,7 @@ func (h *VotingAdvanceHandlers) CreateVoting(env rollmelette.Env, payload []byte
 	return nil
 }
 
-func (h *VotingAdvanceHandlers) DeleteVoting(env rollmelette.Env, payload []byte) error {
+func (h *VotingAdvanceHandlers) DeleteVoting(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
 	var input voting.DeleteVotingInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)

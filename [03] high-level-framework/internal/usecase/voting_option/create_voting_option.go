@@ -2,6 +2,9 @@ package voting_option
 
 import (
 	"context"
+	"errors"
+
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
@@ -17,6 +20,7 @@ type CreateVotingOptionOutputDTO struct {
 }
 
 type CreateVotingOptionUseCase struct {
+	VotingRepository       repository.VotingRepository
 	VotingOptionRepository repository.VotingOptionRepository
 }
 
@@ -25,10 +29,18 @@ func NewCreateVotingOptionUseCase(votingOptionRepository repository.VotingOption
 }
 
 func (uc *CreateVotingOptionUseCase) Execute(ctx context.Context, input *CreateVotingOptionInputDTO) (*CreateVotingOptionOutputDTO, error) {
-	option := &domain.VotingOption{
-		VotingID: input.VotingID,
+	voting, err := uc.VotingRepository.FindVotingByID(input.VotingID)
+	if err != nil {
+		return nil, err
 	}
-	err := uc.VotingOptionRepository.CreateOption(option)
+	if voting.Creator != HexToAddress(ctx.Value("msg_sender").(string)) {
+		return nil, errors.New("unauthorized")
+	}
+	option, err := domain.NewVotingOption(input.VotingID)
+	if err != nil {
+		return nil, err
+	}
+	err = uc.VotingOptionRepository.CreateOption(option)
 	if err != nil {
 		return nil, err
 	}

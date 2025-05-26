@@ -8,7 +8,6 @@ import (
 	inspect_handler "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/inspect"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository/factory"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/router"
-	"github.com/rollmelette/rollmelette"
 )
 
 func NewVotingSystem() *router.Router {
@@ -35,12 +34,8 @@ func NewVotingSystem() *router.Router {
 
 	votingGroup := r.Group("voting")
 	{
-		votingGroup.HandleAdvance("create", func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			return votingAdvanceHandlers.CreateVoting(env, payload)
-		})
-		votingGroup.HandleAdvance("delete", func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			return votingAdvanceHandlers.DeleteVoting(env, payload)
-		})
+		votingGroup.HandleAdvance("create", votingAdvanceHandlers.CreateVoting)
+		votingGroup.HandleAdvance("delete", votingAdvanceHandlers.DeleteVoting)
 
 		votingGroup.HandleInspect("", votingInspectHandlers.FindAllVotings)
 		votingGroup.HandleInspect("id", votingInspectHandlers.FindVotingByID)
@@ -50,12 +45,8 @@ func NewVotingSystem() *router.Router {
 
 	voterGroup := r.Group("voter")
 	{
-		voterGroup.HandleAdvance("create", func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			return voterAdvanceHandlers.CreateVoter(env, payload)
-		})
-		voterGroup.HandleAdvance("delete", func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			return voterAdvanceHandlers.DeleteVoter(env, payload)
-		})
+		voterGroup.HandleAdvance("create", voterAdvanceHandlers.CreateVoter)
+		voterGroup.HandleAdvance("delete", voterAdvanceHandlers.DeleteVoter)
 
 		voterGroup.HandleInspect("id", voterInspectHandlers.FindVoterByID)
 		voterGroup.HandleInspect("address", voterInspectHandlers.FindVoterByAddress)
@@ -63,12 +54,8 @@ func NewVotingSystem() *router.Router {
 
 	votingOptionGroup := r.Group("voting-option")
 	{
-		votingOptionGroup.HandleAdvance("create", func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			return votingOptionAdvanceHandlers.CreateVotingOption(env, payload)
-		})
-		votingOptionGroup.HandleAdvance("delete", func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			return votingOptionAdvanceHandlers.DeleteVotingOption(env, payload)
-		})
+		votingOptionGroup.HandleAdvance("create", votingOptionAdvanceHandlers.CreateVotingOption)
+		votingOptionGroup.HandleAdvance("delete", votingOptionAdvanceHandlers.DeleteVotingOption)
 
 		votingOptionGroup.HandleInspect("id", votingOptionInspectHandlers.FindVotingOptionByID)
 		votingOptionGroup.HandleInspect("voting", votingOptionInspectHandlers.FindAllOptionsByVotingID)

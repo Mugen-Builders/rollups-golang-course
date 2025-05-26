@@ -2,8 +2,10 @@ package voting_option
 
 import (
 	"context"
+	"errors"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 )
 
 type DeleteVotingOptionInputDTO struct {
@@ -23,7 +25,18 @@ func NewDeleteVotingOptionUseCase(votingOptionRepository repository.VotingOption
 }
 
 func (uc *DeleteVotingOptionUseCase) Execute(ctx context.Context, input *DeleteVotingOptionInputDTO) (*DeleteVotingOptionOutputDTO, error) {
-	err := uc.VotingOptionRepository.DeleteOption(input.Id)
+	votingOption, err := uc.VotingOptionRepository.FindOptionByID(input.Id)
+	if err != nil {
+		return &DeleteVotingOptionOutputDTO{Success: false}, err
+	}
+	msgSender, ok := ctx.Value("msg_sender").(string)
+	if !ok {
+		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("error getting msg_sender")
+	}
+	if votingOption.Voting.Creator != HexToAddress(msgSender) {
+		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("unauthorized")
+	}
+	err = uc.VotingOptionRepository.DeleteOption(input.Id)
 	if err != nil {
 		return &DeleteVotingOptionOutputDTO{Success: false}, err
 	}
