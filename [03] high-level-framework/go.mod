@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/ethereum/go-ethereum v1.13.8
-	github.com/rollmelette/rollmelette v0.0.0-20250501120833-e68c5b49ca44
+	github.com/rollmelette/rollmelette v0.0.0-20250526152915-d040d0e21137
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.8.4
 	gorm.io/driver/sqlite v1.5.5
