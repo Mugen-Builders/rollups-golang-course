@@ -38,8 +38,7 @@ func (r *SQLiteRepository) DeleteVoter(id int) error {
 func (r *SQLiteRepository) HasVoted(voterID, votingID int) (bool, error) {
 	var count int64
 	err := r.db.Model(&domain.VotingOption{}).
-		Joins("JOIN votes ON votes.option_id = voting_options.id").
-		Where("votes.voter_id = ? AND voting_options.voting_id = ?", voterID, votingID).
+		Where("voting_id = ? AND voter_id = ?", votingID, voterID).
 		Count(&count).Error
 	if err != nil {
 		return false, err

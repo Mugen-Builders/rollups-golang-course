@@ -17,7 +17,6 @@ type VotingStatus string
 const (
 	VotingStatusOpen     VotingStatus = "open"
 	VotingStatusClosed   VotingStatus = "closed"
-	VotingStatusCanceled VotingStatus = "canceled"
 )
 
 type Voting struct {
@@ -44,6 +43,14 @@ func NewVoting(title string, creator Address, startDate, endDate time.Time) (*Vo
 	return voting, nil
 }
 
+func (v *Voting) GetStartDateUnix() int64 {
+	return v.StartDate.Unix()
+}
+
+func (v *Voting) GetEndDateUnix() int64 {
+	return v.EndDate.Unix()
+}
+
 func (v *Voting) validate() error {
 	if v.Title == "" {
 		return fmt.Errorf("%w: title cannot be empty", ErrInvalidVoting)
@@ -57,7 +64,7 @@ func (v *Voting) validate() error {
 	if v.Creator == (Address{}) {
 		return fmt.Errorf("%w: creator cannot be empty", ErrInvalidVoting)
 	}
-	if v.Status != VotingStatusOpen && v.Status != VotingStatusClosed && v.Status != VotingStatusCanceled {
+	if v.Status != VotingStatusOpen && v.Status != VotingStatusClosed {
 		return fmt.Errorf("%w: invalid status", ErrInvalidVoting)
 	}
 	return nil

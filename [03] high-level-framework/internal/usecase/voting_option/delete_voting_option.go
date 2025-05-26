@@ -6,6 +6,7 @@ import (
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
+	"github.com/rollmelette/rollmelette"
 )
 
 type DeleteVotingOptionInputDTO struct {
@@ -24,16 +25,15 @@ func NewDeleteVotingOptionUseCase(votingOptionRepository repository.VotingOption
 	return &DeleteVotingOptionUseCase{VotingOptionRepository: votingOptionRepository}
 }
 
-func (uc *DeleteVotingOptionUseCase) Execute(ctx context.Context, input *DeleteVotingOptionInputDTO) (*DeleteVotingOptionOutputDTO, error) {
+func (uc *DeleteVotingOptionUseCase) Execute(ctx context.Context, input *DeleteVotingOptionInputDTO, metadata *rollmelette.Metadata) (*DeleteVotingOptionOutputDTO, error) {
 	votingOption, err := uc.VotingOptionRepository.FindOptionByID(input.Id)
 	if err != nil {
 		return &DeleteVotingOptionOutputDTO{Success: false}, err
 	}
-	msgSender, ok := ctx.Value("msg_sender").(string)
-	if !ok {
-		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("error getting msg_sender")
+	if votingOption.Voting == nil {
+		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("voting not found")
 	}
-	if votingOption.Voting.Creator != HexToAddress(msgSender) {
+	if votingOption.Voting.Creator != Address(metadata.MsgSender) {
 		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("unauthorized")
 	}
 	err = uc.VotingOptionRepository.DeleteOption(input.Id)

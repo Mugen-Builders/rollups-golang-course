@@ -2,11 +2,11 @@ package voter
 
 import (
 	"context"
-	"errors"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
+	"github.com/rollmelette/rollmelette"
 )
 
 type CreateVoterOutputDTO struct {
@@ -22,12 +22,8 @@ func NewCreateVoterUseCase(voterRepository repository.VoterRepository) *CreateVo
 	return &CreateVoterUseCase{VoterRepository: voterRepository}
 }
 
-func (uc *CreateVoterUseCase) Execute(ctx context.Context) (*CreateVoterOutputDTO, error) {
-	msgSender, ok := ctx.Value("msg_sender").(string)
-	if !ok {
-		return nil, errors.New("error getting msg_sender")
-	}
-	voter, err := domain.NewVoter(HexToAddress(msgSender))
+func (uc *CreateVoterUseCase) Execute(ctx context.Context, metadata *rollmelette.Metadata) (*CreateVoterOutputDTO, error) {
+	voter, err := domain.NewVoter(Address(metadata.MsgSender))
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,7 @@ type VotingOptionRepository interface {
 	FindAllOptionsByVotingID(votingID int) ([]*domain.VotingOption, error)
 	UpdateOption(option *domain.VotingOption) error
 	DeleteOption(id int) error
-	IncrementVoteCount(id int) error
+	IncrementVoteCount(id int, voterID int) error
 }
 
 type VoterRepository interface {

@@ -11,11 +11,13 @@ import (
 )
 
 type VotingOptionAdvanceHandlers struct {
+	VotingRepository       repository.VotingRepository
 	VotingOptionRepository repository.VotingOptionRepository
 }
 
-func NewVotingOptionAdvanceHandlers(votingOptionRepository repository.VotingOptionRepository) *VotingOptionAdvanceHandlers {
+func NewVotingOptionAdvanceHandlers(votingRepository repository.VotingRepository, votingOptionRepository repository.VotingOptionRepository) *VotingOptionAdvanceHandlers {
 	return &VotingOptionAdvanceHandlers{
+		VotingRepository:       votingRepository,
 		VotingOptionRepository: votingOptionRepository,
 	}
 }
@@ -26,10 +28,10 @@ func (h *VotingOptionAdvanceHandlers) CreateVotingOption(env rollmelette.Env, me
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
 	ctx := context.Background()
-	createVotingOption := voting_option.NewCreateVotingOptionUseCase(h.VotingOptionRepository)
-	res, err := createVotingOption.Execute(ctx, &input)
+	createVotingOption := voting_option.NewCreateVotingOptionUseCase(h.VotingRepository, h.VotingOptionRepository)
+	res, err := createVotingOption.Execute(ctx, &input, &metadata)
 	if err != nil {
-		return fmt.Errorf("failed to create voting option: %w", err)
+		return err
 	}
 	votingOptionBytes, err := json.Marshal(res)
 	if err != nil {
@@ -45,9 +47,8 @@ func (h *VotingOptionAdvanceHandlers) DeleteVotingOption(env rollmelette.Env, me
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "msg_sender", metadata.MsgSender)
 	deleteVotingOption := voting_option.NewDeleteVotingOptionUseCase(h.VotingOptionRepository)
-	res, err := deleteVotingOption.Execute(ctx, &input)
+	res, err := deleteVotingOption.Execute(ctx, &input, &metadata)
 	if err != nil {
 		return fmt.Errorf("failed to delete voting option: %w", err)
 	}

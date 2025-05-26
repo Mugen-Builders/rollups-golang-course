@@ -6,6 +6,7 @@ import (
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
+	"github.com/rollmelette/rollmelette"
 )
 
 type DeleteVotingInputDTO struct {
@@ -24,16 +25,12 @@ func NewDeleteVotingUseCase(votingRepository repository.VotingRepository) *Delet
 	return &DeleteVotingUseCase{VotingRepository: votingRepository}
 }
 
-func (uc *DeleteVotingUseCase) Execute(ctx context.Context, input *DeleteVotingInputDTO) (*DeleteVotingOutputDTO, error) {
+func (uc *DeleteVotingUseCase) Execute(ctx context.Context, input *DeleteVotingInputDTO, metadata *rollmelette.Metadata) (*DeleteVotingOutputDTO, error) {
 	voting, err := uc.VotingRepository.FindVotingByID(input.Id)
 	if err != nil {
 		return &DeleteVotingOutputDTO{Success: false}, err
 	}
-	msgSender, ok := ctx.Value("msg_sender").(string)
-	if !ok {
-		return &DeleteVotingOutputDTO{Success: false}, errors.New("error getting msg_sender")
-	}
-	if voting.Creator != HexToAddress(msgSender) {
+	if voting.Creator != Address(metadata.MsgSender) {
 		return &DeleteVotingOutputDTO{Success: false}, errors.New("unauthorized")
 	}
 	err = uc.VotingRepository.DeleteVoting(input.Id)

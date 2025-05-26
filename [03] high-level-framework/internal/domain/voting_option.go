@@ -12,6 +12,7 @@ var (
 type VotingOption struct {
 	ID        int     `gorm:"primaryKey;autoIncrement"`
 	VotingID  int     `gorm:"not null;index"`
+	VoterID   int     `gorm:"not null;index"`
 	VoteCount int     `gorm:"not null;default:0"`
 	Voting    *Voting `gorm:"foreignKey:VotingID"`
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
+	"github.com/rollmelette/rollmelette"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 )
@@ -25,16 +26,12 @@ func NewDeleteVoterUseCase(voterRepository repository.VoterRepository) *DeleteVo
 	return &DeleteVoterUseCase{VoterRepository: voterRepository}
 }
 
-func (uc *DeleteVoterUseCase) Execute(ctx context.Context, input *DeleteVoterInputDTO) (*DeleteVoterOutputDTO, error) {
+func (uc *DeleteVoterUseCase) Execute(ctx context.Context, input *DeleteVoterInputDTO, metadata *rollmelette.Metadata) (*DeleteVoterOutputDTO, error) {
 	voter, err := uc.VoterRepository.FindVoterByID(input.Id)
 	if err != nil {
 		return &DeleteVoterOutputDTO{Success: false}, err
 	}
-	msgSender, ok := ctx.Value("msg_sender").(string)
-	if !ok {
-		return &DeleteVoterOutputDTO{Success: false}, errors.New("error getting msg_sender")
-	}
-	if voter.Address != HexToAddress(msgSender) {
+	if voter.Address != Address(metadata.MsgSender) {
 		return &DeleteVoterOutputDTO{Success: false}, errors.New("unauthorized")
 	}
 	err = uc.VoterRepository.DeleteVoter(input.Id)

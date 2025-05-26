@@ -89,3 +89,25 @@ func (h *VotingInspectHandlers) GetVotingResults(env rollmelette.EnvInspector, p
 	env.Report(resultsBytes)
 	return nil
 }
+
+func (h *VotingInspectHandlers) GetResults(env rollmelette.EnvInspector, payload []byte) error {
+	var input voting.GetResultsInputDTO
+	if err := json.Unmarshal(payload, &input); err != nil {
+		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	ctx := context.Background()
+	getResults := voting.NewGetResultsUseCase(h.VotingRepository)
+	result, err := getResults.Execute(ctx, &input)
+	if err != nil {
+		return fmt.Errorf("failed to get voting results: %w", err)
+	}
+
+	resultBytes, err := json.Marshal(result)
+	if err != nil {
+		return fmt.Errorf("failed to marshal result: %w", err)
+	}
+
+	env.Report(resultBytes)
+	return nil
+}

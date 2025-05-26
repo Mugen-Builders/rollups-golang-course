@@ -2,11 +2,14 @@ package test
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/cmd/root"
+	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository/factory"
 	"github.com/rollmelette/rollmelette"
 	"github.com/stretchr/testify/suite"
 )
@@ -21,316 +24,285 @@ type VotingSystemSuite struct {
 }
 
 func (s *VotingSystemSuite) SetupTest() {
-	dapp := root.NewVotingSystem()
+	repo, err := factory.NewRepositoryFromConnectionString("sqlite://:memory:")
+	if err != nil {
+		slog.Error("Failed to setup in-memory SQLite database", "error", err)
+		os.Exit(1)
+	}
+	dapp := root.NewVotingSystem(repo)
 	s.tester = rollmelette.NewTester(dapp)
 }
 
-// Voting Group Tests
-func (s *VotingSystemSuite) TestCreateVoting() {
+func (s *VotingSystemSuite) TestAdvanceVotingHandlers() {
 	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
 
 	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
+	startDate := baseTime + 60
+	endDate := baseTime + 120
 
-	// Create voting
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voting created")
+}
+
+func (s *VotingSystemSuite) TestAdvanceVoterHandlers() {
+	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+
+	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
+	result := s.tester.Advance(admin, createVoterInput)
+	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voter created")
+}
+
+func (s *VotingSystemSuite) TestAdvanceVotingOptionHandlers() {
+	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
+
+	baseTime := time.Now().Unix()
+	startDate := baseTime + 60
+	endDate := baseTime + 120
+
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
+	result := s.tester.Advance(candidate, createVotingInput)
+	s.Nil(result.Err, "Failed to create voting")
+	s.Len(result.Notices, 1, "Expected one notice for voting creation")
+	s.Contains(string(result.Notices[0].Payload), "voting created")
+
+	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
+	result = s.tester.Advance(candidate, createOptionInput)
+	s.Nil(result.Err, "Failed to create voting option")
+	s.Len(result.Notices, 1, "Expected one notice for voting option creation")
+	s.Contains(string(result.Notices[0].Payload), "voting option created")
 }
 
 func (s *VotingSystemSuite) TestDeleteVoting() {
 	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
 
+	baseTime := time.Now().Unix()
+	startDate := baseTime + 60
+	endDate := baseTime + 120
+
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
+	result := s.tester.Advance(candidate, createVotingInput)
+	s.Len(result.Notices, 1)
+
 	deleteVotingInput := []byte(`{"path":"voting/delete","data":{"id":1}}`)
-	result := s.tester.Advance(candidate, deleteVotingInput)
+	result = s.tester.Advance(candidate, deleteVotingInput)
 	s.Len(result.Notices, 1)
-}
-
-func (s *VotingSystemSuite) TestFindAllVotings() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-	// First create a voting
-	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
-
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
-	result := s.tester.Advance(candidate, createVotingInput)
-	s.Len(result.Notices, 1)
-
-	// Now inspect all votings
-	findAllInput := []byte(`{"path":"voting","data":{}}`)
-	inspectResult := s.tester.Inspect(findAllInput)
-	s.Nil(inspectResult.Err)
-}
-
-func (s *VotingSystemSuite) TestFindVotingByID() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-	// First create a voting
-	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
-
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
-	result := s.tester.Advance(candidate, createVotingInput)
-	s.Len(result.Notices, 1)
-
-	// Now inspect the voting by ID
-	findByIdInput := []byte(`{"path":"voting/id","data":{"id":1}}`)
-	inspectResult := s.tester.Inspect(findByIdInput)
-	s.Nil(inspectResult.Err)
-}
-
-func (s *VotingSystemSuite) TestFindAllActiveVotings() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-	// First create an active voting
-	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
-
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
-	result := s.tester.Advance(candidate, createVotingInput)
-	s.Len(result.Notices, 1)
-
-	// Now inspect active votings
-	findActiveInput := []byte(`{"path":"voting/active","data":{}}`)
-	inspectResult := s.tester.Inspect(findActiveInput)
-	s.Nil(inspectResult.Err)
-}
-
-func (s *VotingSystemSuite) TestGetVotingResults() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
-
-	// First create a voting
-	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
-
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
-	result := s.tester.Advance(candidate, createVotingInput)
-	s.Len(result.Notices, 1)
-
-	// Create a voter
-	createVoterInput := []byte(fmt.Sprintf(`{"path":"voter/create","data":{"address":"%s","name":"Test Voter"}}`, voter))
-	result = s.tester.Advance(admin, createVoterInput)
-	s.Len(result.Notices, 1)
-
-	// Create a voting option
-	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1,"title":"Test Option","description":"Test Option Description"}}`)
-	result = s.tester.Advance(candidate, createOptionInput)
-	s.Len(result.Notices, 1)
-
-	// Now get voting results
-	getResultsInput := []byte(`{"path":"voting/results","data":{"id":1}}`)
-	inspectResult := s.tester.Inspect(getResultsInput)
-	s.Nil(inspectResult.Err)
-}
-
-// Voter Group Tests
-func (s *VotingSystemSuite) TestCreateVoter() {
-	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
-
-	createVoterInput := []byte(fmt.Sprintf(`{"path":"voter/create","data":{"address":"%s","name":"Test Voter"}}`, voter))
-	result := s.tester.Advance(admin, createVoterInput)
-	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voting deleted")
 }
 
 func (s *VotingSystemSuite) TestDeleteVoter() {
 	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
 
-	deleteVoterInput := []byte(fmt.Sprintf(`{"path":"voter/delete","data":{"address":"%s"}}`, voter))
-	result := s.tester.Advance(admin, deleteVoterInput)
-	s.Len(result.Notices, 1)
-}
-
-func (s *VotingSystemSuite) TestFindVoterByID() {
-	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
-
-	// First create a voter
-	createVoterInput := []byte(fmt.Sprintf(`{"path":"voter/create","data":{"address":"%s","name":"Test Voter"}}`, voter))
+	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
 	result := s.tester.Advance(admin, createVoterInput)
 	s.Len(result.Notices, 1)
 
-	// Now find voter by ID
-	findByIdInput := []byte(`{"path":"voter/id","data":{"id":1}}`)
-	inspectResult := s.tester.Inspect(findByIdInput)
-	s.Nil(inspectResult.Err)
-}
-
-func (s *VotingSystemSuite) TestFindVoterByAddress() {
-	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
-
-	// First create a voter
-	createVoterInput := []byte(fmt.Sprintf(`{"path":"voter/create","data":{"address":"%s","name":"Test Voter"}}`, voter))
-	result := s.tester.Advance(admin, createVoterInput)
+	deleteVoterInput := []byte(`{"path":"voter/delete","data":{"id":1}}`)
+	result = s.tester.Advance(admin, deleteVoterInput)
 	s.Len(result.Notices, 1)
-
-	// Now find voter by address
-	findByAddressInput := []byte(fmt.Sprintf(`{"path":"voter/address","data":{"address":"%s"}}`, voter))
-	inspectResult := s.tester.Inspect(findByAddressInput)
-	s.Nil(inspectResult.Err)
-}
-
-// VotingOption Group Tests
-func (s *VotingSystemSuite) TestCreateVotingOption() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1,"title":"Test Option","description":"Test Option Description"}}`)
-	result := s.tester.Advance(candidate, createOptionInput)
-	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voter deleted")
 }
 
 func (s *VotingSystemSuite) TestDeleteVotingOption() {
 	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
 
-	deleteOptionInput := []byte(`{"path":"voting-option/delete","data":{"id":1}}`)
-	result := s.tester.Advance(candidate, deleteOptionInput)
-	s.Len(result.Notices, 1)
-}
-
-func (s *VotingSystemSuite) TestFindVotingOptionByID() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-	// First create a voting
 	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
+	startDate := baseTime + 60
+	endDate := baseTime + 120
 
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
 
-	// Create a voting option
-	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1,"title":"Test Option","description":"Test Option Description"}}`)
+	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
 	result = s.tester.Advance(candidate, createOptionInput)
 	s.Len(result.Notices, 1)
 
-	// Now find option by ID
+	deleteOptionInput := []byte(`{"path":"voting-option/delete","data":{"id":1}}`)
+	result = s.tester.Advance(candidate, deleteOptionInput)
+	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voting option deleted")
+}
+
+func (s *VotingSystemSuite) TestInspectVotingHandlers() {
+	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
+
+	baseTime := time.Now().Unix()
+	startDate := baseTime + 60
+	endDate := baseTime + 120
+
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
+	result := s.tester.Advance(candidate, createVotingInput)
+	s.Len(result.Notices, 1)
+
+	findAllInput := []byte(`{"path":"voting","data":{}}`)
+	inspectResult := s.tester.Inspect(findAllInput)
+	s.Nil(inspectResult.Err)
+
+	findByIdInput := []byte(`{"path":"voting/id","data":{"id":1}}`)
+	inspectResult = s.tester.Inspect(findByIdInput)
+	s.Nil(inspectResult.Err)
+
+	findActiveInput := []byte(`{"path":"voting/active","data":{}}`)
+	inspectResult = s.tester.Inspect(findActiveInput)
+	s.Nil(inspectResult.Err)
+
+	getResultsInput := []byte(`{"path":"voting/results","data":{"id":1}}`)
+	inspectResult = s.tester.Inspect(getResultsInput)
+	s.Nil(inspectResult.Err)
+}
+
+func (s *VotingSystemSuite) TestInspectVoterHandlers() {
+	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+
+	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
+	result := s.tester.Advance(admin, createVoterInput)
+	s.Len(result.Notices, 1)
+
+	findByIdInput := []byte(`{"path":"voter/id","data":{"id":1}}`)
+	inspectResult := s.tester.Inspect(findByIdInput)
+	s.Nil(inspectResult.Err)
+
+	findByAddressInput := []byte(fmt.Sprintf(`{"path":"voter/address","data":{"address":"%s"}}`, admin))
+	inspectResult = s.tester.Inspect(findByAddressInput)
+	s.Nil(inspectResult.Err)
+}
+
+func (s *VotingSystemSuite) TestInspectVotingOptionHandlers() {
+	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
+
+	baseTime := time.Now().Unix()
+	startDate := baseTime + 60
+	endDate := baseTime + 120
+
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
+	result := s.tester.Advance(candidate, createVotingInput)
+	s.Len(result.Notices, 1)
+
+	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
+	result = s.tester.Advance(candidate, createOptionInput)
+	s.Len(result.Notices, 1)
+
 	findByIdInput := []byte(`{"path":"voting-option/id","data":{"id":1}}`)
 	inspectResult := s.tester.Inspect(findByIdInput)
 	s.Nil(inspectResult.Err)
-}
 
-func (s *VotingSystemSuite) TestFindAllOptionsByVotingID() {
-	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-
-	// First create a voting
-	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
-
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
-	result := s.tester.Advance(candidate, createVotingInput)
-	s.Len(result.Notices, 1)
-
-	// Create a voting option
-	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1,"title":"Test Option","description":"Test Option Description"}}`)
-	result = s.tester.Advance(candidate, createOptionInput)
-	s.Len(result.Notices, 1)
-
-	// Now find all options for the voting
 	findByVotingIdInput := []byte(`{"path":"voting-option/voting","data":{"voting_id":1}}`)
-	inspectResult := s.tester.Inspect(findByVotingIdInput)
+	inspectResult = s.tester.Inspect(findByVotingIdInput)
 	s.Nil(inspectResult.Err)
 }
 
-// Integration Tests
 func (s *VotingSystemSuite) TestVotingWorkflow() {
 	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
 
 	baseTime := time.Now().Unix()
-	closesAt := baseTime + 5
-	maturityAt := baseTime + 10
+	startDate := baseTime + 60
+	endDate := baseTime + 120
 
-	// Create voting
-	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","description":"Test Description","closes_at":%d,"maturity_at":%d}}`, closesAt, maturityAt))
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voting created")
 
-	// Create voter
-	createVoterInput := []byte(fmt.Sprintf(`{"path":"voter/create","data":{"address":"%s","name":"Test Voter"}}`, voter))
+	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
 	result = s.tester.Advance(admin, createVoterInput)
 	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voter created")
 
-	// Create voting option
-	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1,"title":"Test Option","description":"Test Option Description"}}`)
+	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
 	result = s.tester.Advance(candidate, createOptionInput)
 	s.Len(result.Notices, 1)
+	s.Contains(string(result.Notices[0].Payload), "voting option created")
 
-	// Verify voting was created
 	findVotingInput := []byte(`{"path":"voting/id","data":{"id":1}}`)
 	inspectResult := s.tester.Inspect(findVotingInput)
 	s.Nil(inspectResult.Err)
 
-	// Verify voter was created
-	findVoterInput := []byte(fmt.Sprintf(`{"path":"voter/address","data":{"address":"%s"}}`, voter))
+	findVoterInput := []byte(fmt.Sprintf(`{"path":"voter/address","data":{"address":"%s"}}`, admin))
 	inspectResult = s.tester.Inspect(findVoterInput)
 	s.Nil(inspectResult.Err)
 
-	// Verify option was created
 	findOptionInput := []byte(`{"path":"voting-option/id","data":{"id":1}}`)
 	inspectResult = s.tester.Inspect(findOptionInput)
 	s.Nil(inspectResult.Err)
 }
 
-// Validation Tests
 func (s *VotingSystemSuite) TestInvalidPayloads() {
 	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
 
-	// Test invalid voting creation
-	invalidVotingInput := []byte(`{"path":"voting/create","data":{"title":"","description":""}}`)
+	baseTime := time.Now().Unix()
+	startDate := baseTime + 60
+	endDate := baseTime + 120
+
+	invalidVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, invalidVotingInput)
 	s.NotNil(result.Err)
 
-	// Test invalid voter creation
-	invalidVoterInput := []byte(`{"path":"voter/create","data":{"address":"","name":""}}`)
-	result = s.tester.Advance(candidate, invalidVoterInput)
-	s.NotNil(result.Err)
-
-	// Test invalid option creation
-	invalidOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":0,"title":"","description":""}}`)
+	invalidOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":0}}`)
 	result = s.tester.Advance(candidate, invalidOptionInput)
 	s.NotNil(result.Err)
 }
 
 func (s *VotingSystemSuite) TestDuplicateEntries() {
 	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	voter := common.HexToAddress("0x0000000000000000000000000000000000000001")
 
-	// Create voter first time
-	createVoterInput := []byte(fmt.Sprintf(`{"path":"voter/create","data":{"address":"%s","name":"Test Voter"}}`, voter))
+	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
 	result := s.tester.Advance(admin, createVoterInput)
 	s.Len(result.Notices, 1)
 
-	// Try to create same voter again
 	result = s.tester.Advance(admin, createVoterInput)
 	s.NotNil(result.Err)
 }
 
 func (s *VotingSystemSuite) TestNonExistentEntities() {
-	// Try to find non-existent voting
 	findVotingInput := []byte(`{"path":"voting/id","data":{"id":999}}`)
 	inspectResult := s.tester.Inspect(findVotingInput)
 	s.NotNil(inspectResult.Err)
 
-	// Try to find non-existent voter
 	findVoterInput := []byte(`{"path":"voter/address","data":{"address":"0x0000000000000000000000000000000000009999"}}`)
 	inspectResult = s.tester.Inspect(findVoterInput)
 	s.NotNil(inspectResult.Err)
 
-	// Try to find non-existent option
 	findOptionInput := []byte(`{"path":"voting-option/id","data":{"id":999}}`)
 	inspectResult = s.tester.Inspect(findOptionInput)
 	s.NotNil(inspectResult.Err)
+}
+
+func (s *VotingSystemSuite) TestVotingFlow() {
+	candidate := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	admin := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+
+	baseTime := time.Now().Unix()
+	startDate := baseTime + 60
+	endDate := baseTime + 120
+
+	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
+	result := s.tester.Advance(candidate, createVotingInput)
+	s.Nil(result.Err, "Failed to create voting")
+	s.Len(result.Notices, 1, "Expected one notice for voting creation")
+	s.Contains(string(result.Notices[0].Payload), "voting created")
+
+	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
+	result = s.tester.Advance(admin, createVoterInput)
+	s.Nil(result.Err, "Failed to create voter")
+	s.Len(result.Notices, 1, "Expected one notice for voter creation")
+	s.Contains(string(result.Notices[0].Payload), "voter created")
+
+	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
+	result = s.tester.Advance(candidate, createOptionInput)
+	s.Nil(result.Err, "Failed to create voting option")
+	s.Len(result.Notices, 1, "Expected one notice for voting option creation")
+	s.Contains(string(result.Notices[0].Payload), "voting option created")
+
+	voteInput := []byte(`{"path":"voting/vote","data":{"voting_id":1,"option_id":1}}`)
+	result = s.tester.Advance(admin, voteInput)
+	s.Nil(result.Err, "Failed to vote")
+	s.Len(result.Notices, 1, "Expected one notice for vote")
+	s.Contains(string(result.Notices[0].Payload), "vote registered")
+
+	result = s.tester.Advance(admin, voteInput)
+	s.NotNil(result.Err, "Expected error when voting twice")
 }

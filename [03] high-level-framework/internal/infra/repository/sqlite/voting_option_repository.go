@@ -11,7 +11,7 @@ func (r *SQLiteRepository) CreateOption(option *domain.VotingOption) error {
 
 func (r *SQLiteRepository) FindOptionByID(id int) (*domain.VotingOption, error) {
 	var option domain.VotingOption
-	err := r.db.First(&option, id).Error
+	err := r.db.Preload("Voting").First(&option, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +20,7 @@ func (r *SQLiteRepository) FindOptionByID(id int) (*domain.VotingOption, error) 
 
 func (r *SQLiteRepository) FindAllOptionsByVotingID(votingID int) ([]*domain.VotingOption, error) {
 	var options []*domain.VotingOption
-	err := r.db.Where("voting_id = ?", votingID).Find(&options).Error
+	err := r.db.Preload("Voting").Where("voting_id = ?", votingID).Find(&options).Error
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,11 @@ func (r *SQLiteRepository) DeleteOption(id int) error {
 	return r.db.Delete(&domain.VotingOption{}, id).Error
 }
 
-func (r *SQLiteRepository) IncrementVoteCount(id int) error {
-	return r.db.Model(&domain.VotingOption{}).Where("id = ?", id).UpdateColumn("vote_count", gorm.Expr("vote_count + ?", 1)).Error
+func (r *SQLiteRepository) IncrementVoteCount(id int, voterID int) error {
+	return r.db.Model(&domain.VotingOption{}).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"vote_count": gorm.Expr("vote_count + ?", 1),
+			"voter_id":   voterID,
+		}).Error
 }

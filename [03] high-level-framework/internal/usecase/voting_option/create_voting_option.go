@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
+	"github.com/rollmelette/rollmelette"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
@@ -24,16 +25,23 @@ type CreateVotingOptionUseCase struct {
 	VotingOptionRepository repository.VotingOptionRepository
 }
 
-func NewCreateVotingOptionUseCase(votingOptionRepository repository.VotingOptionRepository) *CreateVotingOptionUseCase {
-	return &CreateVotingOptionUseCase{VotingOptionRepository: votingOptionRepository}
+func NewCreateVotingOptionUseCase(votingRepository repository.VotingRepository, votingOptionRepository repository.VotingOptionRepository) *CreateVotingOptionUseCase {
+	return &CreateVotingOptionUseCase{
+		VotingRepository:       votingRepository,
+		VotingOptionRepository: votingOptionRepository,
+	}
 }
 
-func (uc *CreateVotingOptionUseCase) Execute(ctx context.Context, input *CreateVotingOptionInputDTO) (*CreateVotingOptionOutputDTO, error) {
+func (uc *CreateVotingOptionUseCase) Execute(ctx context.Context, input *CreateVotingOptionInputDTO, metadata *rollmelette.Metadata) (*CreateVotingOptionOutputDTO, error) {
+	if input.VotingID <= 0 {
+		return nil, domain.ErrInvalidVotingOption
+	}
+
 	voting, err := uc.VotingRepository.FindVotingByID(input.VotingID)
 	if err != nil {
 		return nil, err
 	}
-	if voting.Creator != HexToAddress(ctx.Value("msg_sender").(string)) {
+	if voting.Creator != Address(metadata.MsgSender) {
 		return nil, errors.New("unauthorized")
 	}
 	option, err := domain.NewVotingOption(input.VotingID)
