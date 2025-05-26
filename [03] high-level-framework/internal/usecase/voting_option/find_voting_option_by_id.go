@@ -30,8 +30,7 @@ func (uc *FindVotingOptionByIDUseCase) Execute(ctx context.Context, input *FindV
 		return nil, err
 	}
 	return &FindVotingOptionByIDOutputDTO{
-		Id:          option.ID,
-		VotingID:    option.VotingID,
-		Description: option.Description,
+		Id:       option.ID,
+		VotingID: option.VotingID,
 	}, nil
 }

@@ -11,9 +11,8 @@ type FindAllOptionsByVotingIDInputDTO struct {
 }
 
 type FindAllOptionsByVotingIDOutputDTO struct {
-	Id          int    `json:"id"`
-	VotingID    int    `json:"voting_id"`
-	Description string `json:"description"`
+	Id       int `json:"id"`
+	VotingID int `json:"voting_id"`
 }
 
 type FindAllOptionsByVotingIDUseCase struct {
@@ -32,9 +31,8 @@ func (uc *FindAllOptionsByVotingIDUseCase) Execute(ctx context.Context, input *F
 	var output []*FindAllOptionsByVotingIDOutputDTO
 	for _, o := range options {
 		output = append(output, &FindAllOptionsByVotingIDOutputDTO{
-			Id:          o.ID,
-			VotingID:    o.VotingID,
-			Description: o.Description,
+			Id:       o.ID,
+			VotingID: o.VotingID,
 		})
 	}
 	return output, nil

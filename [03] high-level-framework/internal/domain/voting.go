@@ -19,23 +19,20 @@ const (
 )
 
 type Voting struct {
-	ID          int             `gorm:"primaryKey;autoIncrement"`
-	Title       string          `gorm:"not null"`
-	Description string          `gorm:"not null"`
-	StartDate   time.Time       `gorm:"not null;index"`
-	EndDate     time.Time       `gorm:"not null;index"`
-	Status      VotingStatus    `gorm:"not null;type:string;default:'open'"`
-	Options     []*VotingOption `gorm:"foreignKey:VotingID"`
+	ID        int             `gorm:"primaryKey;autoIncrement"`
+	Title     string          `gorm:"not null"`
+	StartDate time.Time       `gorm:"not null;index"`
+	EndDate   time.Time       `gorm:"not null;index"`
+	Status    VotingStatus    `gorm:"not null;type:string;default:'open'"`
+	Options   []*VotingOption `gorm:"foreignKey:VotingID"`
 }
 
-func NewVoting(title, description string, startDate, endDate time.Time) (*Voting, error) {
+func NewVoting(title string, startDate, endDate time.Time) (*Voting, error) {
 	voting := &Voting{
-		Title:       title,
-		Description: description,
-		StartDate:   startDate,
-		EndDate:     endDate,
-		Status:      VotingStatusOpen,
-		Options:     make([]*VotingOption, 0),
+		Title:     title,
+		StartDate: startDate,
+		EndDate:   endDate,
+		Status:    VotingStatusOpen,
 	}
 	if err := voting.validate(); err != nil {
 		return nil, err

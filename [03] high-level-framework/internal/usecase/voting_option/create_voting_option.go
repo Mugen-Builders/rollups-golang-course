@@ -8,14 +8,12 @@ import (
 )
 
 type CreateVotingOptionInputDTO struct {
-	VotingID    int    `json:"voting_id"`
-	Description string `json:"description"`
+	VotingID int `json:"voting_id"`
 }
 
 type CreateVotingOptionOutputDTO struct {
-	Id          int    `json:"id"`
-	VotingID    int    `json:"voting_id"`
-	Description string `json:"description"`
+	Id       int `json:"id"`
+	VotingID int `json:"voting_id"`
 }
 
 type CreateVotingOptionUseCase struct {
@@ -28,16 +26,14 @@ func NewCreateVotingOptionUseCase(votingOptionRepository repository.VotingOption
 
 func (uc *CreateVotingOptionUseCase) Execute(ctx context.Context, input *CreateVotingOptionInputDTO) (*CreateVotingOptionOutputDTO, error) {
 	option := &domain.VotingOption{
-		VotingID:    input.VotingID,
-		Description: input.Description,
+		VotingID: input.VotingID,
 	}
 	err := uc.VotingOptionRepository.CreateOption(option)
 	if err != nil {
 		return nil, err
 	}
 	return &CreateVotingOptionOutputDTO{
-		Id:          option.ID,
-		VotingID:    option.VotingID,
-		Description: option.Description,
+		Id:       option.ID,
+		VotingID: option.VotingID,
 	}, nil
 }

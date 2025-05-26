@@ -11,9 +11,8 @@ type FindVotingByIDInputDTO struct {
 }
 
 type FindVotingByIDOutputDTO struct {
-	Id          int    `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Id    int    `json:"id"`
+	Title string `json:"title"`
 }
 
 type FindVotingByIDUseCase struct {
@@ -30,8 +29,7 @@ func (uc *FindVotingByIDUseCase) Execute(ctx context.Context, input *FindVotingB
 		return nil, err
 	}
 	return &FindVotingByIDOutputDTO{
-		Id:          voting.ID,
-		Title:       voting.Title,
-		Description: voting.Description,
+		Id:    voting.ID,
+		Title: voting.Title,
 	}, nil
 }

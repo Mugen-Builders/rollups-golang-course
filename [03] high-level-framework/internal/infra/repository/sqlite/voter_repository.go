@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 )
 
 func (r *SQLiteRepository) CreateVoter(voter *domain.Voter) error {
@@ -17,7 +18,7 @@ func (r *SQLiteRepository) FindVoterByID(id int) (*domain.Voter, error) {
 	return &voter, nil
 }
 
-func (r *SQLiteRepository) FindVoterByAddress(address string) (*domain.Voter, error) {
+func (r *SQLiteRepository) FindVoterByAddress(address Address) (*domain.Voter, error) {
 	var voter domain.Voter
 	err := r.db.Where("address = ?", address).First(&voter).Error
 	if err != nil {

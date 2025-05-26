@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 )
 
 type FindVoterByIDInputDTO struct {
@@ -11,9 +12,8 @@ type FindVoterByIDInputDTO struct {
 }
 
 type FindVoterByIDOutputDTO struct {
-	Id      int    `json:"id"`
-	Address string `json:"address"`
-	Name    string `json:"name"`
+	Id      int     `json:"id"`
+	Address Address `json:"address"`
 }
 
 type FindVoterByIDUseCase struct {
@@ -32,6 +32,5 @@ func (uc *FindVoterByIDUseCase) Execute(ctx context.Context, input *FindVoterByI
 	return &FindVoterByIDOutputDTO{
 		Id:      voter.ID,
 		Address: voter.Address,
-		Name:    voter.Name,
 	}, nil
 }

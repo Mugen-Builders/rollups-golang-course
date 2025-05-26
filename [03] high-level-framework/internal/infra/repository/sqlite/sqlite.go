@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -25,7 +26,9 @@ func (r *SQLiteRepository) Close() error {
 	return sqlDB.Close()
 }
 
-func NewSQLiteRepository(dbPath string) (*SQLiteRepository, error) {
+func NewSQLiteRepository(conn string) (*SQLiteRepository, error) {
+	dbPath := strings.TrimPrefix(conn, "sqlite://")
+
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{

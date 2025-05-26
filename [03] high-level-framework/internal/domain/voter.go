@@ -3,6 +3,8 @@ package domain
 import (
 	"errors"
 	"fmt"
+
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 )
 
 var (
@@ -10,14 +12,12 @@ var (
 )
 
 type Voter struct {
-	ID      int    `gorm:"primaryKey;autoIncrement"`
-	Name    string `gorm:"not null"`
-	Address string `gorm:"not null;uniqueIndex"`
+	ID      int     `gorm:"primaryKey;autoIncrement"`
+	Address Address `gorm:"not null;uniqueIndex"`
 }
 
-func NewVoter(name, address string) (*Voter, error) {
+func NewVoter(address Address) (*Voter, error) {
 	voter := &Voter{
-		Name:    name,
 		Address: address,
 	}
 	if err := voter.validate(); err != nil {
@@ -27,10 +27,7 @@ func NewVoter(name, address string) (*Voter, error) {
 }
 
 func (v *Voter) validate() error {
-	if v.Name == "" {
-		return fmt.Errorf("%w: name cannot be empty", ErrInvalidVoter)
-	}
-	if v.Address == "" {
+	if v.Address == (Address{}) {
 		return fmt.Errorf("%w: address cannot be empty", ErrInvalidVoter)
 	}
 	return nil

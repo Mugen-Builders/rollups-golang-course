@@ -11,9 +11,8 @@ type GetVotingResultsInputDTO struct {
 }
 
 type VotingOptionResultDTO struct {
-	OptionID    int    `json:"option_id"`
-	Description string `json:"description"`
-	VoteCount   int    `json:"vote_count"`
+	OptionID  int `json:"option_id"`
+	VoteCount int `json:"vote_count"`
 }
 
 type GetVotingResultsOutputDTO struct {
@@ -37,9 +36,8 @@ func (uc *GetVotingResultsUseCase) Execute(ctx context.Context, input *GetVoting
 	results := make([]VotingOptionResultDTO, 0, len(options))
 	for _, opt := range options {
 		results = append(results, VotingOptionResultDTO{
-			OptionID:    opt.ID,
-			Description: opt.Description,
-			VoteCount:   opt.VoteCount,
+			OptionID:  opt.ID,
+			VoteCount: opt.VoteCount,
 		})
 	}
 	return &GetVotingResultsOutputDTO{

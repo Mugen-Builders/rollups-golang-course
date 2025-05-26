@@ -5,17 +5,16 @@ import (
 
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
 )
 
 type CreateVoterInputDTO struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
+	Address Address `json:"address"`
 }
 
 type CreateVoterOutputDTO struct {
-	Id      int    `json:"id"`
-	Address string `json:"address"`
-	Name    string `json:"name"`
+	Id      int     `json:"id"`
+	Address Address `json:"address"`
 }
 
 type CreateVoterUseCase struct {
@@ -29,7 +28,6 @@ func NewCreateVoterUseCase(voterRepository repository.VoterRepository) *CreateVo
 func (uc *CreateVoterUseCase) Execute(ctx context.Context, input *CreateVoterInputDTO) (*CreateVoterOutputDTO, error) {
 	voter := &domain.Voter{
 		Address: input.Address,
-		Name:    input.Name,
 	}
 	err := uc.VoterRepository.CreateVoter(voter)
 	if err != nil {
@@ -38,6 +36,5 @@ func (uc *CreateVoterUseCase) Execute(ctx context.Context, input *CreateVoterInp
 	return &CreateVoterOutputDTO{
 		Id:      voter.ID,
 		Address: voter.Address,
-		Name:    voter.Name,
 	}, nil
 }

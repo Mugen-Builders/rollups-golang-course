@@ -1,6 +1,9 @@
 package repository
 
-import "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
+import (
+	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/domain"
+	. "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/custom_type"
+)
 
 type VotingRepository interface {
 	CreateVoting(voting *domain.Voting) error
@@ -23,7 +26,7 @@ type VotingOptionRepository interface {
 type VoterRepository interface {
 	CreateVoter(voter *domain.Voter) error
 	FindVoterByID(id int) (*domain.Voter, error)
-	FindVoterByAddress(address string) (*domain.Voter, error)
+	FindVoterByAddress(address Address) (*domain.Voter, error)
 	UpdateVoter(voter *domain.Voter) error
 	DeleteVoter(id int) error
 	HasVoted(voterID, votingID int) (bool, error)

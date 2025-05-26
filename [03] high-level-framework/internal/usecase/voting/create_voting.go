@@ -9,18 +9,16 @@ import (
 )
 
 type CreateVotingInputDTO struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
+	Title     string    `json:"title"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
 }
 
 type CreateVotingOutputDTO struct {
-	Id          int       `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
+	Id        int       `json:"id"`
+	Title     string    `json:"title"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
 }
 
 type CreateVotingUseCase struct {
@@ -33,20 +31,18 @@ func NewCreateVotingUseCase(votingRepository repository.VotingRepository) *Creat
 
 func (uc *CreateVotingUseCase) Execute(ctx context.Context, input *CreateVotingInputDTO) (*CreateVotingOutputDTO, error) {
 	voting := &domain.Voting{
-		Title:       input.Title,
-		Description: input.Description,
-		StartDate:   input.StartDate,
-		EndDate:     input.EndDate,
+		Title:     input.Title,
+		StartDate: input.StartDate,
+		EndDate:   input.EndDate,
 	}
 	err := uc.VotingRepository.CreateVoting(voting)
 	if err != nil {
 		return nil, err
 	}
 	return &CreateVotingOutputDTO{
-		Id:          voting.ID,
-		Title:       voting.Title,
-		Description: voting.Description,
-		StartDate:   voting.StartDate,
-		EndDate:     voting.EndDate,
+		Id:        voting.ID,
+		Title:     voting.Title,
+		StartDate: voting.StartDate,
+		EndDate:   voting.EndDate,
 	}, nil
 }
