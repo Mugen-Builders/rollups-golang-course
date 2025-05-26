@@ -136,22 +136,35 @@ func (s *VotingSystemSuite) TestInspectVotingHandlers() {
 	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
+	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","creator":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
 
+	// Test FindAll
 	findAllInput := []byte(`{"path":"voting","data":{}}`)
 	inspectResult := s.tester.Inspect(findAllInput)
 	s.Nil(inspectResult.Err)
+	expectedFindAll := fmt.Sprintf(`[{"id":1,"title":"Test Voting","status":"open","start_date":%d,"end_date":%d}]`, startDate, endDate)
+	s.Equal(expectedFindAll, string(inspectResult.Reports[0].Payload))
 
+	// Test FindByID
 	findByIdInput := []byte(`{"path":"voting/id","data":{"id":1}}`)
 	inspectResult = s.tester.Inspect(findByIdInput)
 	s.Nil(inspectResult.Err)
+	expectedFindById := fmt.Sprintf(`{"id":1,"title":"Test Voting","status":"open","start_date":%d,"end_date":%d}`, startDate, endDate)
+	s.Equal(expectedFindById, string(inspectResult.Reports[0].Payload))
 
+	// Test FindAllActive
 	findActiveInput := []byte(`{"path":"voting/active","data":{}}`)
 	inspectResult = s.tester.Inspect(findActiveInput)
 	s.Nil(inspectResult.Err)
+	expectedFindActive := fmt.Sprintf(`[{"id":1,"title":"Test Voting","status":"open","start_date":%d,"end_date":%d}]`, startDate, endDate)
+	s.Equal(expectedFindActive, string(inspectResult.Reports[0].Payload))
 
+	// Test GetResults
 	getResultsInput := []byte(`{"path":"voting/results","data":{"id":1}}`)
 	inspectResult = s.tester.Inspect(getResultsInput)
 	s.Nil(inspectResult.Err)
+	expectedGetResults := `{"id":1,"title":"Test Voting","status":"open","total_votes":0,"options":[],"winner_id":0,"winner_votes":0}`
+	s.Equal(expectedGetResults, string(inspectResult.Reports[0].Payload))
 }
 
 func (s *VotingSystemSuite) TestInspectVoterHandlers() {
@@ -160,14 +173,19 @@ func (s *VotingSystemSuite) TestInspectVoterHandlers() {
 	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
 	result := s.tester.Advance(admin, createVoterInput)
 	s.Len(result.Notices, 1)
+	s.Equal(fmt.Sprintf(`voter created - {"id":1,"address":"%s"}`, admin.Hex()), string(result.Notices[0].Payload))
 
 	findByIdInput := []byte(`{"path":"voter/id","data":{"id":1}}`)
 	inspectResult := s.tester.Inspect(findByIdInput)
 	s.Nil(inspectResult.Err)
+	expectedFindById := fmt.Sprintf(`{"id":1,"address":"%s"}`, admin.Hex())
+	s.Equal(expectedFindById, string(inspectResult.Reports[0].Payload))
 
 	findByAddressInput := []byte(fmt.Sprintf(`{"path":"voter/address","data":{"address":"%s"}}`, admin))
 	inspectResult = s.tester.Inspect(findByAddressInput)
 	s.Nil(inspectResult.Err)
+	expectedFindByAddress := fmt.Sprintf(`{"id":1,"address":"%s"}`, admin.Hex())
+	s.Equal(expectedFindByAddress, string(inspectResult.Reports[0].Payload))
 }
 
 func (s *VotingSystemSuite) TestInspectVotingOptionHandlers() {
@@ -180,18 +198,24 @@ func (s *VotingSystemSuite) TestInspectVotingOptionHandlers() {
 	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
+	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","creator":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
 
 	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
 	result = s.tester.Advance(candidate, createOptionInput)
 	s.Len(result.Notices, 1)
+	s.Equal(`voting option created - {"id":1,"voting_id":1}`, string(result.Notices[0].Payload))
 
 	findByIdInput := []byte(`{"path":"voting-option/id","data":{"id":1}}`)
 	inspectResult := s.tester.Inspect(findByIdInput)
 	s.Nil(inspectResult.Err)
+	expectedFindById := `{"id":1,"voting_id":1,"vote_count":0}`
+	s.Equal(expectedFindById, string(inspectResult.Reports[0].Payload))
 
 	findByVotingIdInput := []byte(`{"path":"voting-option/voting","data":{"voting_id":1}}`)
 	inspectResult = s.tester.Inspect(findByVotingIdInput)
 	s.Nil(inspectResult.Err)
+	expectedFindByVotingId := `[{"id":1,"voting_id":1,"vote_count":0}]`
+	s.Equal(expectedFindByVotingId, string(inspectResult.Reports[0].Payload))
 }
 
 func (s *VotingSystemSuite) TestVotingWorkflow() {
@@ -205,29 +229,35 @@ func (s *VotingSystemSuite) TestVotingWorkflow() {
 	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
-	s.Contains(string(result.Notices[0].Payload), "voting created")
+	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","creator":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
 
 	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
 	result = s.tester.Advance(admin, createVoterInput)
 	s.Len(result.Notices, 1)
-	s.Contains(string(result.Notices[0].Payload), "voter created")
+	s.Equal(fmt.Sprintf(`voter created - {"id":1,"address":"%s"}`, admin.Hex()), string(result.Notices[0].Payload))
 
 	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
 	result = s.tester.Advance(candidate, createOptionInput)
 	s.Len(result.Notices, 1)
-	s.Contains(string(result.Notices[0].Payload), "voting option created")
+	s.Equal(`voting option created - {"id":1,"voting_id":1}`, string(result.Notices[0].Payload))
 
 	findVotingInput := []byte(`{"path":"voting/id","data":{"id":1}}`)
 	inspectResult := s.tester.Inspect(findVotingInput)
 	s.Nil(inspectResult.Err)
+	expectedFindVoting := fmt.Sprintf(`{"id":1,"title":"Test Voting","status":"open","start_date":%d,"end_date":%d}`, startDate, endDate)
+	s.Equal(expectedFindVoting, string(inspectResult.Reports[0].Payload))
 
 	findVoterInput := []byte(fmt.Sprintf(`{"path":"voter/address","data":{"address":"%s"}}`, admin))
 	inspectResult = s.tester.Inspect(findVoterInput)
 	s.Nil(inspectResult.Err)
+	expectedFindVoter := fmt.Sprintf(`{"id":1,"address":"%s"}`, admin.Hex())
+	s.Equal(expectedFindVoter, string(inspectResult.Reports[0].Payload))
 
 	findOptionInput := []byte(`{"path":"voting-option/id","data":{"id":1}}`)
 	inspectResult = s.tester.Inspect(findOptionInput)
 	s.Nil(inspectResult.Err)
+	expectedFindOption := `{"id":1,"voting_id":1,"vote_count":0}`
+	s.Equal(expectedFindOption, string(inspectResult.Reports[0].Payload))
 }
 
 func (s *VotingSystemSuite) TestInvalidPayloads() {

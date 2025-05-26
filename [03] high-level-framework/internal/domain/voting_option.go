@@ -6,7 +6,9 @@ import (
 )
 
 var (
+	ErrOptionNotFound      = errors.New("voting option not found")
 	ErrInvalidVotingOption = errors.New("invalid voting option")
+	ErrInvalidOption       = errors.New("voting option does not belong to the voting")
 )
 
 type VotingOption struct {

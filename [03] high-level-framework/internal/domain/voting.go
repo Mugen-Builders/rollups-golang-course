@@ -10,13 +10,15 @@ import (
 
 var (
 	ErrInvalidVoting = errors.New("invalid voting")
+	ErrVotingClosed  = errors.New("voting is closed")
+	ErrAlreadyVoted  = errors.New("voter has already voted in this voting")
 )
 
 type VotingStatus string
 
 const (
-	VotingStatusOpen     VotingStatus = "open"
-	VotingStatusClosed   VotingStatus = "closed"
+	VotingStatusOpen   VotingStatus = "open"
+	VotingStatusClosed VotingStatus = "closed"
 )
 
 type Voting struct {
@@ -36,6 +38,7 @@ func NewVoting(title string, creator Address, startDate, endDate time.Time) (*Vo
 		StartDate: startDate,
 		EndDate:   endDate,
 		Status:    VotingStatusOpen,
+		Options:   make([]*VotingOption, 0),
 	}
 	if err := voting.validate(); err != nil {
 		return nil, err

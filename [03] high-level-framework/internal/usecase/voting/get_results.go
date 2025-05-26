@@ -43,9 +43,10 @@ func (u *GetResultsUseCase) Execute(ctx context.Context, input *GetResultsInputD
 	}
 
 	result := &GetResultsOutputDTO{
-		ID:     voting.ID,
-		Title:  voting.Title,
-		Status: string(voting.Status),
+		ID:      voting.ID,
+		Title:   voting.Title,
+		Status:  string(voting.Status),
+		Options: make([]OptionResultDTO, 0),
 	}
 
 	var totalVotes int

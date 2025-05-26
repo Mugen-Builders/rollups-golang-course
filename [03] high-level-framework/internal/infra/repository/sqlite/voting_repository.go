@@ -10,7 +10,7 @@ func (r *SQLiteRepository) CreateVoting(voting *domain.Voting) error {
 
 func (r *SQLiteRepository) FindVotingByID(id int) (*domain.Voting, error) {
 	var voting domain.Voting
-	err := r.db.First(&voting, id).Error
+	err := r.db.Preload("Options").First(&voting, id).Error
 	if err != nil {
 		return nil, err
 	}

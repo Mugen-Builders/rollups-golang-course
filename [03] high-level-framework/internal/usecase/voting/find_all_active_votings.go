@@ -7,8 +7,11 @@ import (
 )
 
 type FindAllActiveVotingsOutputDTO struct {
-	Id    int    `json:"id"`
-	Title string `json:"title"`
+	Id        int    `json:"id"`
+	Title     string `json:"title"`
+	Status    string `json:"status"`
+	StartDate int64  `json:"start_date"`
+	EndDate   int64  `json:"end_date"`
 }
 
 type FindAllActiveVotingsUseCase struct {
@@ -27,8 +30,11 @@ func (uc *FindAllActiveVotingsUseCase) Execute(ctx context.Context) ([]*FindAllA
 	var output []*FindAllActiveVotingsOutputDTO
 	for _, v := range votings {
 		output = append(output, &FindAllActiveVotingsOutputDTO{
-			Id:    v.ID,
-			Title: v.Title,
+			Id:        v.ID,
+			Title:     v.Title,
+			Status:    string(v.Status),
+			StartDate: v.GetStartDateUnix(),
+			EndDate:   v.GetEndDateUnix(),
 		})
 	}
 	return output, nil

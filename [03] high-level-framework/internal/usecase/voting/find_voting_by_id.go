@@ -11,8 +11,11 @@ type FindVotingByIDInputDTO struct {
 }
 
 type FindVotingByIDOutputDTO struct {
-	Id    int    `json:"id"`
-	Title string `json:"title"`
+	Id        int    `json:"id"`
+	Title     string `json:"title"`
+	Status    string `json:"status"`
+	StartDate int64  `json:"start_date"`
+	EndDate   int64  `json:"end_date"`
 }
 
 type FindVotingByIDUseCase struct {
@@ -29,7 +32,10 @@ func (uc *FindVotingByIDUseCase) Execute(ctx context.Context, input *FindVotingB
 		return nil, err
 	}
 	return &FindVotingByIDOutputDTO{
-		Id:    voting.ID,
-		Title: voting.Title,
+		Id:        voting.ID,
+		Title:     voting.Title,
+		Status:    string(voting.Status),
+		StartDate: voting.GetStartDateUnix(),
+		EndDate:   voting.GetEndDateUnix(),
 	}, nil
 }

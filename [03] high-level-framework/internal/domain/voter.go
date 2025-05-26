@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrInvalidVoter = errors.New("invalid voter")
+	ErrInvalidVoter  = errors.New("invalid voter")
+	ErrVoterNotFound = errors.New("voter not found")
 )
 
 type Voter struct {
