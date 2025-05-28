@@ -18,9 +18,12 @@ jobs:
           "[01] to-upper",
           "[02] to-do",
           "[03] high-level-framework",
-          # "[04] asset-handling",
-          # "[05] alt-da",
-          # "[06] auction"
+          "[04] asset-handling",
+          "[05] interacting-with-the-base-layer",
+          "[06] auction",
+          "[07] delegate-call-voucher",
+          # "[08] alt-da",
+          # "[09] tribes",
         ]
     steps:
       - name: Checkout
