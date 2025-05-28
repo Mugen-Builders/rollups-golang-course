@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	advance_handler "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/advance"
+	advance "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/advance"
 	inspect_handler "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/inspect"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository/factory"
@@ -61,13 +61,13 @@ func run(cmd *cobra.Command, args []string) {
 }
 
 func NewVotingSystem(repo repository.Repository) *router.Router {
-	votingAdvanceHandlers := advance_handler.NewVotingAdvanceHandlers(repo)
+	votingAdvanceHandlers := advance.NewVotingAdvanceHandlers(repo)
 	votingInspectHandlers := inspect_handler.NewVotingInspectHandlers(repo, repo)
 
-	voterAdvanceHandlers := advance_handler.NewVoterAdvanceHandlers(repo)
+	voterAdvanceHandlers := advance.NewVoterAdvanceHandlers(repo)
 	voterInspectHandlers := inspect_handler.NewVoterInspectHandlers(repo)
 
-	votingOptionAdvanceHandlers := advance_handler.NewVotingOptionAdvanceHandlers(repo, repo)
+	votingOptionAdvanceHandlers := advance.NewVotingOptionAdvanceHandlers(repo, repo)
 	votingOptionInspectHandlers := inspect_handler.NewVotingOptionInspectHandlers(repo)
 
 	r := router.NewRouter()

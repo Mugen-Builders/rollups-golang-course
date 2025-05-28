@@ -10,7 +10,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/advance_handler"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/advance"
 	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/inspect_handler"
 	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/repository/factory"
 	"github.com/henriquemarlon/cartesi-golang-series/to-do/pkg/rollups"
@@ -51,7 +51,7 @@ func main() {
 		errlog.Panicln("Failed to initialize repository", "error", err)
 	}
 
-	ah := advance_handler.NewToDoAdvanceHandlers(toDoRepository)
+	ah := advance.NewToDoAdvanceHandlers(toDoRepository)
 	if err != nil {
 		errlog.Panicln("Failed to initialize advance handlers", "error", err)
 	}
