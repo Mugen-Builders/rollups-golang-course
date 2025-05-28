@@ -1,4 +1,4 @@
-module github/henriquemarlon/cartesi-golang-series/asset-handling
+module github.com/henriquemarlon/cartesi-golang-series/asset-handling
 
 go 1.22.5
 

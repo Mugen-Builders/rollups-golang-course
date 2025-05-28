@@ -1,6 +1,6 @@
-module github/henriquemarlon/cartesi-golang-series/delegate-call-voucher
+module github.com/henriquemarlon/cartesi-golang-series/delegate-call-voucher
 
-go 1.22.5
+go 1.23.0
 
 require (
 	github.com/ethereum/go-ethereum v1.13.8

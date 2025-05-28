@@ -1,4 +1,4 @@
-module github/henriquemarlon/cartesi-golang-series/asset-handling
+module github.com/henriquemarlon/cartesi-golang-series/interacting-with-the-base-layer
 
 go 1.22.5
 
