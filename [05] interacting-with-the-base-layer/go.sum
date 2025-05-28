@@ -26,8 +26,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
-github.com/rollmelette/rollmelette v0.0.0-20250526152915-d040d0e21137 h1:IF+FrhKOZ8Z3nf828XtB6bECPgjpvhPP2HRvDy4iA6s=
-github.com/rollmelette/rollmelette v0.0.0-20250526152915-d040d0e21137/go.mod h1:vi9BDrdDsL59Qb+AsuxHktniuXZ68esNc/UJlgW5fOI=
+github.com/rollmelette/rollmelette v0.0.0-20250527205316-fc2a54d0c54b h1:YT0h9JzqQw1RFvhOSWVExloRn24ZmkO09L2k55KGyaQ=
+github.com/rollmelette/rollmelette v0.0.0-20250527205316-fc2a54d0c54b/go.mod h1:vi9BDrdDsL59Qb+AsuxHktniuXZ68esNc/UJlgW5fOI=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 golang.org/x/crypto v0.17.0 h1:r8bRNjWL3GshPW3gkd+RpvzWrZAwPS49OmTGZ/uhM4k=

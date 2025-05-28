@@ -1,4 +1,4 @@
-module github/henriquemarlon/cartesi-golang-series/asset-handling
+module github/henriquemarlon/cartesi-golang-series/delegate-call-voucher
 
 go 1.22.5
 

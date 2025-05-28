@@ -73,3 +73,4 @@ func (u *GetResultsUseCase) Execute(ctx context.Context, input *GetResultsInputD
 
 	return result, nil
 }
+ 
