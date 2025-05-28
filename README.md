@@ -10,8 +10,8 @@
 </div>
 <br>
 <p align="center">
-	<img src="https://img.shields.io/github/license/henriquemarlon/cartesi-golang-series/golang-video-series?style=default&logo=opensourceinitiative&logoColor=white&color=48AED9" alt="license">
-	<img src="https://img.shields.io/github/last-commit/henriquemarlon/cartesi-golang-series/golang-video-series?style=default&logo=git&logoColor=white&color=000000" alt="last-commit">
+	<img src="https://img.shields.io/github/license/henriquemarlon/cartesi-golang-series?style=default&logo=opensourceinitiative&logoColor=white&color=48AED9" alt="license">
+	<img src="https://img.shields.io/github/last-commit/henriquemarlon/cartesi-golang-series?style=default&logo=git&logoColor=white&color=000000" alt="last-commit">
 </p>
 
 ## Syllabus:
