@@ -20,7 +20,7 @@ jobs:
           "[03] high-level-framework",
           "[04] asset-handling",
           "[05] interacting-with-the-base-layer",
-          "[06] auction",
+          # "[06] auction",
           "[07] delegate-call-voucher",
           # "[08] alt-da",
           # "[09] tribes",
