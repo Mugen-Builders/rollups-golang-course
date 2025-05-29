@@ -13,29 +13,7 @@ import (
 	"github.com/rollmelette/rollmelette"
 )
 
-var (
-	safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
-
-	safeTransferABIJSON = `[{
-		"type":"function",
-		"name":"safeTransfer",
-		"inputs":[
-			{"type":"address"},
-			{"type":"address"},
-			{"type":"uint256"}
-		]
-	}]`
-
-	safeTransferABI = mustParseABI(safeTransferABIJSON)
-)
-
-func mustParseABI(jsonStr string) abi.ABI {
-	parsed, err := abi.JSON(strings.NewReader(jsonStr))
-	if err != nil {
-		panic(err)
-	}
-	return parsed
-}
+var safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 
 type Application struct{}
 
@@ -82,7 +60,7 @@ func (a *Application) Advance(
 			if err != nil {
 				return err
 			}
-			
+
 			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
 			return nil
 		} else {
