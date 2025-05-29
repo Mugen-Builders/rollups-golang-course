@@ -64,10 +64,25 @@ func (a *Application) Advance(
 			if err := json.Unmarshal(input.Data, &safeTransferInput); err != nil {
 				return err
 			}
-			delegateCallVoucher, err := safeTransferABI.Pack("safeTransfer", safeTransferInput.Token, safeTransferInput.To, safeTransferInput.Amount)
+
+			abiJSON := `[{
+				"type":"function",
+				"name":"safeTransfer",
+				"inputs":[
+					{"type":"address"},
+					{"type":"address"},
+					{"type":"uint256"}
+				]
+			}]`
+			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
 			if err != nil {
 				return err
 			}
+			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", safeTransferInput.Token, safeTransferInput.To, safeTransferInput.Amount)
+			if err != nil {
+				return err
+			}
+			
 			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
 			return nil
 		} else {
