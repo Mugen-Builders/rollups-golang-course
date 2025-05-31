@@ -5,8 +5,6 @@ import (
 	"log/slog"
 	"os"
 
-	// advance "github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/cartesi/handler/advance"
-	// inspect_handler "github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/cartesi/handler/inspect"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/cartesi/handler/advance"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/cartesi/handler/inspect"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/repository"
