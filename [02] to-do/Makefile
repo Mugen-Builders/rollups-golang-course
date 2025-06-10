@@ -5,6 +5,10 @@ all: help
 lint: ## Run the golangci linter
 	golangci-lint run
 
+.PHONY: test
+test: ## Run the application unit tests
+	go test -v ./...
+
 .PHONY: build
 build: ## Build the application RISC-V image with sunodo
 	cartesi build
