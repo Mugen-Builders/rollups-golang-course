@@ -13,7 +13,10 @@ import (
 	"github.com/rollmelette/rollmelette"
 )
 
-var safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+var (
+	safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+	anyone                   = common.HexToAddress("0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
+)
 
 type Application struct{}
 
@@ -51,17 +54,36 @@ func (a *Application) Advance(
 					{"type":"address"},
 					{"type":"uint256"}
 				]
+			},
+			{
+				"type":"function",
+				"name":"safeTransferTargeted",
+				"inputs":[
+					{"type":"address"},
+					{"type":"address"},
+					{"type":"address"},
+					{"type":"uint256"}
+				]
 			}]`
 			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
 			if err != nil {
 				return err
 			}
-			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", safeTransferInput.Token, safeTransferInput.To, safeTransferInput.Amount)
+
+			halfAmount := new(big.Int).Div(safeTransferInput.Amount, big.NewInt(2))
+
+			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", safeTransferInput.Token, safeTransferInput.To, halfAmount)
+			if err != nil {
+				return err
+			}
+
+			delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", safeTransferInput.Token, anyone, safeTransferInput.To, halfAmount)
 			if err != nil {
 				return err
 			}
 
 			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
+			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
 			return nil
 		} else {
 			env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))
