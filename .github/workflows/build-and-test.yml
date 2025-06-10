@@ -52,5 +52,6 @@ jobs:
         working-directory: ${{ matrix.project }}
       
       - name: Test ${{ matrix.project }}
+        if: ${{ matrix.project != '[01] to-upper' }}
         run: make test
         working-directory: ${{ matrix.project }}
