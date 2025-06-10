@@ -9,10 +9,6 @@ lint: ## Run the golangci linter
 test: ## Run the application unit tests
 	go test -v ./...
 
-.PHONY: dev
-dev: ## Run the application inside nonodo
-	nonodo -- go run .
-
 .PHONY: build
 build: ## Build the application RISC-V image with sunodo
 	cartesi build

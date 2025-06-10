@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/rollmelette/rollmelette"
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/repository"
 	auction_usecase "github.com/henriquemarlon/cartesi-golang-series/auction/internal/usecase/auction"
+	"github.com/rollmelette/rollmelette"
 )
 
 type AuctionInspectHandlers struct {
@@ -24,6 +25,11 @@ func (h *AuctionInspectHandlers) FindAuctionById(env rollmelette.EnvInspector, p
 	var input auction_usecase.FindAuctionByIdInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()
@@ -61,6 +67,11 @@ func (h *AuctionInspectHandlers) FindAuctionsByInvestor(env rollmelette.EnvInspe
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
 
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	findAuctionsByInvestor := auction_usecase.NewFindAuctionsByInvestorUseCase(h.AuctionRepository)
 	res, err := findAuctionsByInvestor.Execute(ctx, &input)
@@ -79,6 +90,11 @@ func (h *AuctionInspectHandlers) FindAuctionsByCreator(env rollmelette.EnvInspec
 	var input auction_usecase.FindAuctionsByCreatorInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()

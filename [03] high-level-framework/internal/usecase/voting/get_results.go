@@ -7,7 +7,7 @@ import (
 )
 
 type GetResultsInputDTO struct {
-	ID int `json:"id"`
+	ID int `json:"id" validate:"required"`
 }
 
 type OptionResultDTO struct {

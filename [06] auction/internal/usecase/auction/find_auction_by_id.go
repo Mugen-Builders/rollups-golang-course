@@ -8,7 +8,7 @@ import (
 )
 
 type FindAuctionByIdInputDTO struct {
-	Id uint `json:"id"`
+	Id uint `json:"id" validate:"required"`
 }
 
 type FindAuctionByIdUseCase struct {
@@ -24,9 +24,9 @@ func (f *FindAuctionByIdUseCase) Execute(ctx context.Context, input *FindAuction
 	if err != nil {
 		return nil, err
 	}
-	var orders []*domain.Order
-	for _, order := range res.Orders {
-		orders = append(orders, &domain.Order{
+	orders := make([]*domain.Order, len(res.Orders))
+	for i, order := range res.Orders {
+		orders[i] = &domain.Order{
 			Id:           order.Id,
 			AuctionId:    order.AuctionId,
 			Investor:     order.Investor,
@@ -35,21 +35,22 @@ func (f *FindAuctionByIdUseCase) Execute(ctx context.Context, input *FindAuction
 			State:        order.State,
 			CreatedAt:    order.CreatedAt,
 			UpdatedAt:    order.UpdatedAt,
-		})
+		}
 	}
 	return &FindAuctionOutputDTO{
 		Id:                res.Id,
 		Token:             res.Token,
 		Creator:           res.Creator,
 		CollateralAddress: res.CollateralAddress,
+		CollateralAmount:  res.CollateralAmount,
 		DebtIssued:        res.DebtIssued,
 		MaxInterestRate:   res.MaxInterestRate,
 		TotalObligation:   res.TotalObligation,
-		Orders:            orders,
 		State:             string(res.State),
+		Orders:            orders,
+		CreatedAt:         res.CreatedAt,
 		ClosesAt:          res.ClosesAt,
 		MaturityAt:        res.MaturityAt,
-		CreatedAt:         res.CreatedAt,
 		UpdatedAt:         res.UpdatedAt,
 	}, nil
 }

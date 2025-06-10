@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/usecase/voter"
 	"github.com/rollmelette/rollmelette"
@@ -40,6 +41,12 @@ func (h *VoterAdvanceHandlers) DeleteVoter(env rollmelette.Env, metadata rollmel
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	deleteVoter := voter.NewDeleteVoterUseCase(h.VoterRepository)
 	res, err := deleteVoter.Execute(ctx, &input, &metadata)

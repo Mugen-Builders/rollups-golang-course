@@ -63,10 +63,6 @@ func parseRequestRawPayload(payload []byte) (*Request, error) {
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, fmt.Errorf("invalid request format: %v", err)
 	}
-	if len(req.Data) == 0 {
-		fmt.Printf("[parseRequestRawPayload] Empty payload: %s\n", string(payload))
-		return nil, fmt.Errorf("empty payload")
-	}
 	return &req, nil
 }
 

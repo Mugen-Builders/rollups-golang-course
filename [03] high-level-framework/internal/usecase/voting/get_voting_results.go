@@ -7,7 +7,7 @@ import (
 )
 
 type GetVotingResultsInputDTO struct {
-	VotingID int `json:"voting_id"`
+	VotingID int `json:"voting_id" validate:"required"`
 }
 
 type VotingOptionResultDTO struct {

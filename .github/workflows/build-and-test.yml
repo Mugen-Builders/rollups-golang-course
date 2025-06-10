@@ -10,7 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   build:
-    name: build
+    name: build-and-test
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,8 +22,7 @@ jobs:
           "[05] interacting-with-the-base-layer",
           "[06] auction",
           "[07] delegate-call-voucher",
-          # "[08] alt-da",
-          # "[09] tribes",
+          "[09] tribes",
         ]
     steps:
       - name: Checkout
@@ -37,6 +36,10 @@ jobs:
       - name: Install Cartesi CLI
         run: npm install -g @cartesi/cli@2.0.0-alpha.8
 
+      - name: Test ${{ matrix.project }}
+        run: go test -v ./... 
+        working-directory: ${{ matrix.project }}
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -44,5 +47,5 @@ jobs:
         run: cartesi doctor
 
       - name: Build ${{ matrix.project }}
-        run: cartesi build
+        run: make build
         working-directory: ${{ matrix.project }}

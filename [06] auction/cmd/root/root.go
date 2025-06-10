@@ -21,9 +21,9 @@ const (
 var (
 	useMemoryDB bool
 	Cmd         = &cobra.Command{
-		Use:   "voting-" + CMD_NAME,
-		Short: "Runs Voting Rollup",
-		Long:  `Cartesi Rollup Application for voting`,
+		Use:   "auction-" + CMD_NAME,
+		Short: "Runs Auction Rollup",
+		Long:  `Cartesi Rollup Application for auction`,
 		Run:   run,
 	}
 )
@@ -84,7 +84,6 @@ func NewAuctionSystem(repo repository.Repository) *router.Router {
 
 	auctionGroup := r.Group("auction")
 	{
-		auctionGroup.HandleAdvance("update", auctionAdvanceHandlers.UpdateAuction)
 		auctionGroup.HandleAdvance("create", auctionAdvanceHandlers.CreateAuction)
 		auctionGroup.HandleAdvance("settle", auctionAdvanceHandlers.SettleAuction)
 		auctionGroup.HandleAdvance("execute-collateral", auctionAdvanceHandlers.ExecuteAuctionCollateral)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/domain"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/usecase/auction"
@@ -32,6 +33,11 @@ func (h *AuctionAdvanceHandlers) CreateAuction(env rollmelette.Env, metadata rol
 	var input auction.CreateAuctionInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()
@@ -67,6 +73,11 @@ func (h *AuctionAdvanceHandlers) CloseAuction(env rollmelette.Env, metadata roll
 	var input auction.CloseAuctionInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()
@@ -115,6 +126,11 @@ func (h *AuctionAdvanceHandlers) SettleAuction(env rollmelette.Env, metadata rol
 	var input auction.SettleAuctionInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()
@@ -169,8 +185,13 @@ func (h *AuctionAdvanceHandlers) ExecuteAuctionCollateral(env rollmelette.Env, m
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
 
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
-	executeAuctionCollateral := auction.NewExecuteAuctionCollateralUseCase(h.AuctionRepository)
+	executeAuctionCollateral := auction.NewExecuteAuctionCollateralUseCase(h.AuctionRepository, h.OrderRepository)
 	res, err := executeAuctionCollateral.Execute(ctx, &input, metadata)
 	if err != nil {
 		return fmt.Errorf("failed to execute auction collateral: %w", err)
@@ -211,27 +232,5 @@ func (h *AuctionAdvanceHandlers) ExecuteAuctionCollateral(env rollmelette.Env, m
 	}
 
 	env.Notice(append([]byte("auction collateral executed - "), auction...))
-	return nil
-}
-
-func (h *AuctionAdvanceHandlers) UpdateAuction(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-	var input auction.UpdateAuctionInputDTO
-	if err := json.Unmarshal(payload, &input); err != nil {
-		return fmt.Errorf("failed to unmarshal input: %w", err)
-	}
-
-	ctx := context.Background()
-	updateAuction := auction.NewUpdateAuctionUseCase(h.AuctionRepository)
-	res, err := updateAuction.Execute(ctx, input, metadata)
-	if err != nil {
-		return fmt.Errorf("failed to update auction: %w", err)
-	}
-
-	auction, err := json.Marshal(res)
-	if err != nil {
-		return fmt.Errorf("failed to marshal response: %w", err)
-	}
-
-	env.Notice(append([]byte("auction updated - "), auction...))
 	return nil
 }

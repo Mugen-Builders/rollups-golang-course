@@ -10,8 +10,8 @@ import (
 )
 
 type CreateVoterOutputDTO struct {
-	Id      int     `json:"id"`
-	Address Address `json:"address"`
+	Id      int     `json:"id" validate:"required"`
+	Address Address `json:"address" validate:"required"`
 }
 
 type CreateVoterUseCase struct {

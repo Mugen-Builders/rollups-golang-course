@@ -12,13 +12,13 @@ import (
 )
 
 type CreateOrderInputDTO struct {
-	CrowndfundingId uint         `json:"Auction_id"`
-	InterestRate    *uint256.Int `json:"interest_rate"`
+	AuctionId    uint         `json:"auction_id" validate:"required"`
+	InterestRate *uint256.Int `json:"interest_rate" validate:"required"`
 }
 
 type CreateOrderOutputDTO struct {
 	Id           uint         `json:"id"`
-	AuctionId    uint         `json:"Auction_id"`
+	AuctionId    uint         `json:"auction_id"`
 	Investor     Address      `json:"investor"`
 	Amount       *uint256.Int `json:"amount"`
 	InterestRate *uint256.Int `json:"interest_rate"`
@@ -44,7 +44,7 @@ func (c *CreateOrderUseCase) Execute(ctx context.Context, input *CreateOrderInpu
 		return nil, fmt.Errorf("invalid deposit custom_type provided for order creation: %T", deposit)
 	}
 
-	auction, err := c.AuctionRepository.FindAuctionById(ctx, input.CrowndfundingId)
+	auction, err := c.AuctionRepository.FindAuctionById(ctx, input.AuctionId)
 	if err != nil {
 		return nil, fmt.Errorf("error finding auction campaigns: %w", err)
 	}

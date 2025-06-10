@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/usecase/order"
 	"github.com/rollmelette/rollmelette"
@@ -30,6 +31,11 @@ func (h *OrderAdvanceHandlers) CreateOrder(env rollmelette.Env, metadata rollmel
 	var input order.CreateOrderInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w, payload: %s", err, string(payload))
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()
@@ -70,6 +76,11 @@ func (h *OrderAdvanceHandlers) CancelOrder(env rollmelette.Env, metadata rollmel
 	var input order.CancelOrderInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	ctx := context.Background()

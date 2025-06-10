@@ -7,7 +7,7 @@ import (
 )
 
 type FindOrderByIdInputDTO struct {
-	Id uint `json:"id"`
+	Id uint `json:"id" validate:"required"`
 }
 
 type FindOrderByIdUseCase struct {

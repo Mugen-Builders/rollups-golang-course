@@ -16,7 +16,6 @@ var (
 type AuctionState string
 
 const (
-	AuctionStateUnderReview        AuctionState = "under_review"
 	AuctionStateClosed             AuctionState = "closed"
 	AuctionStateOngoing            AuctionState = "ongoing"
 	AuctionStateCanceled           AuctionState = "canceled"
@@ -49,7 +48,8 @@ func NewAuction(token Address, creator Address, collateral_address Address, coll
 		CollateralAmount:  collateral_amount,
 		DebtIssued:        debt_issued,
 		MaxInterestRate:   maxInterestRate,
-		State:             AuctionStateUnderReview,
+		State:             AuctionStateOngoing,
+		Orders:            []*Order{},
 		ClosesAt:          closesAt,
 		MaturityAt:        maturityAt,
 		CreatedAt:         createdAt,

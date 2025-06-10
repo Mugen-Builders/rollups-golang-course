@@ -13,7 +13,7 @@ import (
 )
 
 type CloseAuctionInputDTO struct {
-	Creator Address `json:"creator"`
+	Creator Address `json:"creator" validate:"required"`
 }
 
 type CloseAuctionOutputDTO struct {
@@ -21,14 +21,15 @@ type CloseAuctionOutputDTO struct {
 	Token             Address         `json:"token,omitempty"`
 	Creator           Address         `json:"creator,omitempty"`
 	CollateralAddress Address         `json:"collateral_address,omitempty"`
+	CollateralAmount  *uint256.Int    `json:"collateral_amount,omitempty"`
 	DebtIssued        *uint256.Int    `json:"debt_issued,omitempty"`
 	MaxInterestRate   *uint256.Int    `json:"max_interest_rate,omitempty"`
 	TotalObligation   *uint256.Int    `json:"total_obligation,omitempty"`
-	Orders            []*domain.Order `json:"orders,omitempty"`
 	State             string          `json:"state,omitempty"`
+	Orders            []*domain.Order `json:"orders,omitempty"`
+	CreatedAt         int64           `json:"created_at,omitempty"`
 	ClosesAt          int64           `json:"closes_at,omitempty"`
 	MaturityAt        int64           `json:"maturity_at,omitempty"`
-	CreatedAt         int64           `json:"created_at,omitempty"`
 	UpdatedAt         int64           `json:"updated_at,omitempty"`
 }
 
@@ -126,7 +127,7 @@ func (u *CloseAuctionUseCase) Execute(ctx context.Context, input *CloseAuctionIn
 				Amount:       rejectedAmount,
 				InterestRate: order.InterestRate,
 				State:        domain.OrderStateRejected,
-				CreatedAt:    metadata.BlockTimestamp,
+				CreatedAt:    order.CreatedAt,
 				UpdatedAt:    metadata.BlockTimestamp,
 			})
 			if err != nil {
@@ -160,7 +161,7 @@ func (u *CloseAuctionUseCase) Execute(ctx context.Context, input *CloseAuctionIn
 		if _, err := u.AuctionRepository.UpdateAuction(ctx, ongoingAuction); err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("auction canceled due to insufficient funds collected")
+		return nil, fmt.Errorf("auction canceled due to insufficient funds collected, expected at least 2/3 of the debt issued: %s, got: %s", twoThirds.String(), totalCollected.String())
 	}
 
 	// -------------------------------------------------------------------------
@@ -179,6 +180,7 @@ func (u *CloseAuctionUseCase) Execute(ctx context.Context, input *CloseAuctionIn
 		Token:             res.Token,
 		Creator:           res.Creator,
 		CollateralAddress: res.CollateralAddress,
+		CollateralAmount:  res.CollateralAmount,
 		DebtIssued:        res.DebtIssued,
 		MaxInterestRate:   res.MaxInterestRate,
 		TotalObligation:   res.TotalObligation,

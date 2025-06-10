@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/rollmelette/rollmelette"
 	"github.com/henriquemarlon/cartesi-golang-series/auction/internal/infra/repository"
 	order_usecase "github.com/henriquemarlon/cartesi-golang-series/auction/internal/usecase/order"
+	"github.com/rollmelette/rollmelette"
 )
 
 type OrderInspectHandlers struct {

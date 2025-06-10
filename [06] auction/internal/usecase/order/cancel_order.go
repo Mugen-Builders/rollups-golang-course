@@ -11,7 +11,7 @@ import (
 )
 
 type CancelOrderInputDTO struct {
-	Id uint `json:"id"`
+	Id uint `json:"id" validate:"required"`
 }
 
 type CancelOrderOutputDTO struct {

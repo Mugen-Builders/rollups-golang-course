@@ -12,11 +12,11 @@ import (
 )
 
 type CreateAuctionInputDTO struct {
-	Token           Address      `json:"token"`
-	DebtIssued      *uint256.Int `json:"debt_issued"`
-	MaxInterestRate *uint256.Int `json:"max_interest_rate"`
-	ClosesAt        int64        `json:"closes_at"`
-	MaturityAt      int64        `json:"maturity_at"`
+	Token           Address      `json:"token" validate:"required"`
+	DebtIssued      *uint256.Int `json:"debt_issued" validate:"required"`
+	MaxInterestRate *uint256.Int `json:"max_interest_rate" validate:"required"`
+	ClosesAt        int64        `json:"closes_at" validate:"required"`
+	MaturityAt      int64        `json:"maturity_at" validate:"required"`
 }
 
 type CreateAuctionOutputDTO struct {
@@ -27,11 +27,11 @@ type CreateAuctionOutputDTO struct {
 	CollateralAmount  *uint256.Int    `json:"collateral_amount,omitempty"`
 	DebtIssued        *uint256.Int    `json:"debt_issued"`
 	MaxInterestRate   *uint256.Int    `json:"max_interest_rate"`
-	Orders            []*domain.Order `json:"orders"`
 	State             string          `json:"state"`
+	Orders            []*domain.Order `json:"orders"`
+	CreatedAt         int64           `json:"created_at"`
 	ClosesAt          int64           `json:"closes_at"`
 	MaturityAt        int64           `json:"maturity_at"`
-	CreatedAt         int64           `json:"created_at"`
 }
 
 type CreateAuctionUseCase struct {
@@ -89,7 +89,7 @@ func (c *CreateAuctionUseCase) Execute(ctx context.Context, input *CreateAuction
 	if err != nil {
 		return nil, fmt.Errorf("error creating Auction: %w", err)
 	}
-	
+
 	createdAuction, err := c.AuctionRepository.CreateAuction(ctx, Auction)
 	if err != nil {
 		return nil, fmt.Errorf("error creating Auction: %w", err)

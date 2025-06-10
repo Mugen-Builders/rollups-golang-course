@@ -7,7 +7,7 @@ import (
 )
 
 type FindOrdersByAuctionIdInputDTO struct {
-	AuctionId uint `json:"Auction_id"`
+	AuctionId uint `json:"auction_id" validate:"required"`
 }
 
 type FindOrdersByAuctionIdOutputDTO []*FindOrderOutputDTO

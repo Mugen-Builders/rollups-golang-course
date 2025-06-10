@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/usecase/voting_option"
 	"github.com/rollmelette/rollmelette"
@@ -25,6 +26,12 @@ func (h *VotingOptionInspectHandlers) FindVotingOptionByID(env rollmelette.EnvIn
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	findVotingOptionByID := voting_option.NewFindVotingOptionByIDUseCase(h.VotingOptionRepository)
 	votingOptionRes, err := findVotingOptionByID.Execute(ctx, &input)
@@ -44,6 +51,12 @@ func (h *VotingOptionInspectHandlers) FindAllOptionsByVotingID(env rollmelette.E
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	findAllOptionsByVotingID := voting_option.NewFindAllOptionsByVotingIDUseCase(h.VotingOptionRepository)
 	options, err := findAllOptionsByVotingID.Execute(ctx, &input)

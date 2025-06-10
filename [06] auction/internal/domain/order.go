@@ -16,17 +16,18 @@ var (
 type OrderState string
 
 const (
-	OrderStatePending           OrderState = "pending"
-	OrderStateAccepted          OrderState = "accepted"
-	OrderCancelled              OrderState = "cancelled"
-	OrderStatePartiallyAccepted OrderState = "partially_accepted"
-	OrderStateRejected          OrderState = "rejected"
-	OrderStateSettled           OrderState = "settled"
+	OrderStatePending             OrderState = "pending"
+	OrderStateAccepted            OrderState = "accepted"
+	OrderCancelled                OrderState = "cancelled"
+	OrderStatePartiallyAccepted   OrderState = "partially_accepted"
+	OrderStateRejected            OrderState = "rejected"
+	OrderStateSettled             OrderState = "settled"
+	OrderStateSettledByCollateral OrderState = "settled_by_collateral"
 )
 
 type Order struct {
 	Id           uint         `json:"id" gorm:"primaryKey"`
-	AuctionId    uint         `json:"Auction_id" gorm:"not null;index"`
+	AuctionId    uint         `json:"auction_id" gorm:"not null;index"`
 	Investor     Address      `json:"investor,omitempty" gorm:"not null"`
 	Amount       *uint256.Int `json:"amount,omitempty" gorm:"custom_type:text;not null"`
 	InterestRate *uint256.Int `json:"interest_rate,omitempty" gorm:"custom_type:text;not null"`

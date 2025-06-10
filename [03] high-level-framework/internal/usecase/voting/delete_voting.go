@@ -10,7 +10,7 @@ import (
 )
 
 type DeleteVotingInputDTO struct {
-	Id int `json:"id"`
+	Id int `json:"id" validate:"required"`
 }
 
 type DeleteVotingOutputDTO struct {

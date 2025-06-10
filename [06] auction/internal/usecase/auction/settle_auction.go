@@ -12,7 +12,7 @@ import (
 )
 
 type SettleAuctionInputDTO struct {
-	AuctionId uint `json:"Auction_id"`
+	AuctionId uint `json:"auction_id" validate:"required"`
 }
 
 type SettleAuctionOutputDTO struct {
@@ -20,14 +20,15 @@ type SettleAuctionOutputDTO struct {
 	Token             Address         `json:"token"`
 	Creator           Address         `json:"creator"`
 	CollateralAddress Address         `json:"collateral_address"`
+	CollateralAmount  *uint256.Int    `json:"collateral_amount"`
 	DebtIssued        *uint256.Int    `json:"debt_issued"`
 	MaxInterestRate   *uint256.Int    `json:"max_interest_rate"`
 	TotalObligation   *uint256.Int    `json:"total_obligation"`
-	Orders            []*domain.Order `json:"orders"`
 	State             string          `json:"state"`
+	Orders            []*domain.Order `json:"orders"`
+	CreatedAt         int64           `json:"created_at"`
 	ClosesAt          int64           `json:"closes_at"`
 	MaturityAt        int64           `json:"maturity_at"`
-	CreatedAt         int64           `json:"created_at"`
 	UpdatedAt         int64           `json:"updated_at"`
 }
 
@@ -92,14 +93,15 @@ func (uc *SettleAuctionUseCase) Execute(
 		Token:             res.Token,
 		Creator:           res.Creator,
 		CollateralAddress: res.CollateralAddress,
+		CollateralAmount:  res.CollateralAmount,
 		DebtIssued:        res.DebtIssued,
 		MaxInterestRate:   res.MaxInterestRate,
 		TotalObligation:   res.TotalObligation,
-		Orders:            res.Orders,
 		State:             string(res.State),
+		Orders:            res.Orders,
+		CreatedAt:         res.CreatedAt,
 		ClosesAt:          res.ClosesAt,
 		MaturityAt:        res.MaturityAt,
-		CreatedAt:         res.CreatedAt,
 		UpdatedAt:         res.UpdatedAt,
 	}, nil
 }

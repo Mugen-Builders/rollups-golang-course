@@ -42,14 +42,15 @@ func (f *FindAllAuctionsUseCase) Execute(ctx context.Context) (*FindAllAuctionsO
 			Token:             Auction.Token,
 			Creator:           Auction.Creator,
 			CollateralAddress: Auction.CollateralAddress,
+			CollateralAmount:  Auction.CollateralAmount,
 			DebtIssued:        Auction.DebtIssued,
 			MaxInterestRate:   Auction.MaxInterestRate,
 			TotalObligation:   Auction.TotalObligation,
-			Orders:            orders,
 			State:             string(Auction.State),
+			Orders:            orders,
+			CreatedAt:         Auction.CreatedAt,
 			ClosesAt:          Auction.ClosesAt,
 			MaturityAt:        Auction.MaturityAt,
-			CreatedAt:         Auction.CreatedAt,
 			UpdatedAt:         Auction.UpdatedAt,
 		}
 	}

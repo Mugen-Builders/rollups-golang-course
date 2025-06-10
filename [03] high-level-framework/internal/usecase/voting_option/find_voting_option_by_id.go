@@ -7,7 +7,7 @@ import (
 )
 
 type FindVotingOptionByIDInputDTO struct {
-	Id int `json:"id"`
+	Id int `json:"id" validate:"required"`
 }
 
 type FindVotingOptionByIDOutputDTO struct {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/usecase/voter"
 	"github.com/rollmelette/rollmelette"
@@ -25,6 +26,12 @@ func (h *VoterInspectHandlers) FindVoterByID(env rollmelette.EnvInspector, paylo
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	findVoterByID := voter.NewFindVoterByIDUseCase(h.VoterRepository)
 	voterRes, err := findVoterByID.Execute(ctx, &input)
@@ -44,6 +51,12 @@ func (h *VoterInspectHandlers) FindVoterByAddress(env rollmelette.EnvInspector, 
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	findVoterByAddress := voter.NewFindVoterByAddressUseCase(h.VoterRepository)
 	voterRes, err := findVoterByAddress.Execute(ctx, &input)

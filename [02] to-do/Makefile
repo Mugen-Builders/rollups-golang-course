@@ -5,10 +5,6 @@ all: help
 lint: ## Run the golangci linter
 	golangci-lint run
 
-.PHONY: dev
-dev: ## Run the application inside nonodo
-	nonodo -- go run .
-
 .PHONY: build
 build: ## Build the application RISC-V image with sunodo
 	cartesi build

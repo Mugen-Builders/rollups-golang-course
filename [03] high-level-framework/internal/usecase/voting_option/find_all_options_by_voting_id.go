@@ -7,7 +7,7 @@ import (
 )
 
 type FindAllOptionsByVotingIDInputDTO struct {
-	VotingID int `json:"voting_id"`
+	VotingID int `json:"voting_id" validate:"required"`
 }
 
 type FindAllOptionsByVotingIDOutputDTO struct {

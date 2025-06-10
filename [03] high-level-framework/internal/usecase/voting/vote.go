@@ -10,8 +10,8 @@ import (
 )
 
 type VoteInputDTO struct {
-	VotingID int `json:"voting_id"`
-	OptionID int `json:"option_id"`
+	VotingID int `json:"voting_id" validate:"required"`
+	OptionID int `json:"option_id" validate:"required"`
 }
 
 type VoteOutputDTO struct {

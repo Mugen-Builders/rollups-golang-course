@@ -8,7 +8,7 @@ import (
 )
 
 type FindOrdersByInvestorInputDTO struct {
-	Investor Address `json:"investor"`
+	Investor Address `json:"investor" validate:"required"`
 }
 
 type FindOrdersByInvestorOutputDTO []*FindOrderOutputDTO

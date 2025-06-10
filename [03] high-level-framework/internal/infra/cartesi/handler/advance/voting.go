@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/usecase/voting"
 	"github.com/rollmelette/rollmelette"
@@ -31,6 +32,12 @@ func (h *VotingAdvanceHandlers) CreateVoting(env rollmelette.Env, metadata rollm
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	res, err := h.CreateVotingUseCase.Execute(ctx, &input, &metadata)
 	if err != nil {
@@ -49,6 +56,12 @@ func (h *VotingAdvanceHandlers) DeleteVoting(env rollmelette.Env, metadata rollm
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	res, err := h.DeleteVotingUseCase.Execute(ctx, &input, &metadata)
 	if err != nil {
@@ -66,6 +79,11 @@ func (h *VotingAdvanceHandlers) Vote(env rollmelette.Env, metadata rollmelette.M
 	var input voting.VoteInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
+	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	res, err := h.VoteUseCase.Execute(input, &metadata)

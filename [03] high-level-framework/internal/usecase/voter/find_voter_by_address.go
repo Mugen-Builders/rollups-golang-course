@@ -8,7 +8,7 @@ import (
 )
 
 type FindVoterByAddressInputDTO struct {
-	Address Address `json:"address"`
+	Address Address `json:"address" validate:"required"`
 }
 
 type FindVoterByAddressOutputDTO struct {

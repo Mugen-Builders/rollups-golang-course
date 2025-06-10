@@ -9,7 +9,7 @@ import (
 )
 
 type FindAuctionsByCreatorInputDTO struct {
-	Creator Address `json:"creator"`
+	Creator Address `json:"creator" validate:"required"`
 }
 
 type FindAuctionsByCreatorOutputDTO []*FindAuctionOutputDTO
@@ -47,13 +47,15 @@ func (f *FindAuctionsByCreatorUseCase) Execute(ctx context.Context, input *FindA
 			Token:             Auction.Token,
 			Creator:           Auction.Creator,
 			CollateralAddress: Auction.CollateralAddress,
+			CollateralAmount:  Auction.CollateralAmount,
 			DebtIssued:        Auction.DebtIssued,
 			MaxInterestRate:   Auction.MaxInterestRate,
-			Orders:            orders,
+			TotalObligation:   Auction.TotalObligation,
 			State:             string(Auction.State),
+			Orders:            orders,
+			CreatedAt:         Auction.CreatedAt,
 			ClosesAt:          Auction.ClosesAt,
 			MaturityAt:        Auction.MaturityAt,
-			CreatedAt:         Auction.CreatedAt,
 			UpdatedAt:         Auction.UpdatedAt,
 		}
 	}

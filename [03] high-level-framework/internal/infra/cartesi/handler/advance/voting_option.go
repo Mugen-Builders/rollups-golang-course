@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/usecase/voting_option"
 	"github.com/rollmelette/rollmelette"
@@ -27,6 +28,12 @@ func (h *VotingOptionAdvanceHandlers) CreateVotingOption(env rollmelette.Env, me
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	createVotingOption := voting_option.NewCreateVotingOptionUseCase(h.VotingRepository, h.VotingOptionRepository)
 	res, err := createVotingOption.Execute(ctx, &input, &metadata)
@@ -46,6 +53,12 @@ func (h *VotingOptionAdvanceHandlers) DeleteVotingOption(env rollmelette.Env, me
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	ctx := context.Background()
 	deleteVotingOption := voting_option.NewDeleteVotingOptionUseCase(h.VotingOptionRepository)
 	res, err := deleteVotingOption.Execute(ctx, &input, &metadata)
