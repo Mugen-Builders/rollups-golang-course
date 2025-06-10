@@ -47,8 +47,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
-github.com/rollmelette/rollmelette v0.0.0-20250527205316-fc2a54d0c54b h1:YT0h9JzqQw1RFvhOSWVExloRn24ZmkO09L2k55KGyaQ=
-github.com/rollmelette/rollmelette v0.0.0-20250527205316-fc2a54d0c54b/go.mod h1:vi9BDrdDsL59Qb+AsuxHktniuXZ68esNc/UJlgW5fOI=
+github.com/rollmelette/rollmelette v0.0.0-20250610212915-1d7da4139d79 h1:MIIk2nyTIrZmRyUG3mi85UZuyvr4CpH/tv0Gd4U8Xo4=
+github.com/rollmelette/rollmelette v0.0.0-20250610212915-1d7da4139d79/go.mod h1:vi9BDrdDsL59Qb+AsuxHktniuXZ68esNc/UJlgW5fOI=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/spf13/cobra v1.9.1 h1:CXSaggrXdbHK9CF+8ywj8Amf7PBRmPCOJugH954Nnlo=
 github.com/spf13/cobra v1.9.1/go.mod h1:nDyEzZ8ogv936Cinf6g1RU9MRY64Ir93oCnqb9wxYW0=
