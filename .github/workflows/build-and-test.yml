@@ -41,10 +41,6 @@ jobs:
       - name: Install Cartesi CLI
         run: npm install -g @cartesi/cli@2.0.0-alpha.8
 
-      - name: Test ${{ matrix.project }}
-        run: go test -v ./... 
-        working-directory: ${{ matrix.project }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -53,4 +49,8 @@ jobs:
 
       - name: Build ${{ matrix.project }}
         run: make build
+        working-directory: ${{ matrix.project }}
+      
+      - name: Test ${{ matrix.project }}
+        run: make test
         working-directory: ${{ matrix.project }}
