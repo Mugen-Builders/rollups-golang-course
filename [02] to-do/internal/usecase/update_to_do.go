@@ -7,10 +7,10 @@ import (
 )
 
 type UpdateToDoInputDTO struct {
-	Id          uint   `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Completed   bool   `json:"completed"`
+	Id          uint   `json:"id" validate:"required"`
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Completed   bool   `json:"completed" validate:"required"`
 }
 
 type UpdateToDoOutputDTO struct {

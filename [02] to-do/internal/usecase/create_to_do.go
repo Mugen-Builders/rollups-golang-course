@@ -7,8 +7,8 @@ import (
 )
 
 type CreateToDoInputDTO struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description" validate:"required"`
 }
 
 type CreateToDoOutputDTO struct {

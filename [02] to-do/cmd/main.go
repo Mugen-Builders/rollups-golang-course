@@ -10,8 +10,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/advance_handler"
-	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/inspect_handler"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/handler/advance"
+	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/cartesi/handler/inspect"
 	"github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/repository/factory"
 	"github.com/henriquemarlon/cartesi-golang-series/to-do/pkg/rollups"
 )

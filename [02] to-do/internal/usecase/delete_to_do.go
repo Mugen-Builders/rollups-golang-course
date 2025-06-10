@@ -3,7 +3,7 @@ package usecase
 import "github.com/henriquemarlon/cartesi-golang-series/to-do/internal/infra/repository"
 
 type DeleteToDoInputDTO struct {
-	Id uint `json:"id"`
+	Id uint `json:"id" validate:"required"`
 }
 
 type DeleteToDoUseCase struct {
