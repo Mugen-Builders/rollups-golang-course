@@ -36,17 +36,7 @@ func (a *Application) Advance(
 
 	switch d := deposit.(type) {
 	case *rollmelette.ERC20Deposit:
-		if input.Path == "safe_transfer" {
-			var safeTransferInput struct {
-				Token  common.Address `json:"token"`
-				To     common.Address `json:"to"`
-				Amount *big.Int       `json:"amount"`
-			}
-			if err := json.Unmarshal(input.Data, &safeTransferInput); err != nil {
-				return err
-			}
-
-			abiJSON := `[{
+		abiJSON := `[{
 				"type":"function",
 				"name":"safeTransfer",
 				"inputs":[
@@ -65,30 +55,28 @@ func (a *Application) Advance(
 					{"type":"uint256"}
 				]
 			}]`
-			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-			if err != nil {
-				return err
-			}
-
-			halfAmount := new(big.Int).Div(safeTransferInput.Amount, big.NewInt(2))
-
-			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", safeTransferInput.Token, safeTransferInput.To, halfAmount)
-			if err != nil {
-				return err
-			}
-
-			delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", safeTransferInput.Token, anyone, safeTransferInput.To, halfAmount)
-			if err != nil {
-				return err
-			}
-
-			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
-			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
-			return nil
-		} else {
-			env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))
-			return nil
+		abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+		if err != nil {
+			return err
 		}
+
+		halfAmount := new(big.Int).Div(d.Amount, big.NewInt(2))
+
+		delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
+		if err != nil {
+			return err
+		}
+
+		delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", d.Token, anyone, d.Sender, halfAmount)
+		if err != nil {
+			return err
+		}
+
+		env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Amount))
+		
+		env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
+		env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
+		return nil
 	default:
 		env.Report([]byte(fmt.Sprintf("Unknown deposit type: %T", d)))
 		return nil
