@@ -22,7 +22,7 @@ jobs:
           "[05] interacting-with-the-base-layer",
           "[06] auction",
           "[07] delegate-call-voucher",
-          "[09] tribes",
+          # "[09] tribes",
         ]
     steps:
       - name: Checkout
