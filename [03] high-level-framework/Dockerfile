@@ -98,8 +98,6 @@ EOF
 
 ENV PATH="/opt/cartesi/bin:${PATH}"
 
-RUN chown -R dapp:dapp /opt/cartesi/dapp
-
 WORKDIR /opt/cartesi/dapp
 COPY --from=cross-build-stage /bin/dapp .
 
