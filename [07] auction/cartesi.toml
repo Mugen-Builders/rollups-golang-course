@@ -1,0 +1,5 @@
+[drives.root]
+builder = "docker"
+dockerfile = "Dockerfile"
+format = "ext2"
+extraSize = "100Mb"
