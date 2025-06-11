@@ -69,7 +69,6 @@ func NewAuctionSystem(repo repository.Repository) *router.Router {
 
 	r := router.NewRouter()
 	r.Use(router.LoggingMiddleware)
-	r.Use(router.ValidationMiddleware)
 	r.Use(router.ErrorHandlingMiddleware)
 
 	orderGroup := r.Group("order")

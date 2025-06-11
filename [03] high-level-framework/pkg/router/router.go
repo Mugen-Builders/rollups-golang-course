@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/rollmelette/rollmelette"
 )
 
@@ -54,7 +55,7 @@ func (r *Router) HandleInspect(path string, handler InspectHandlerFunc) {
 }
 
 type Request struct {
-	Path string          `json:"path"`
+	Path string          `json:"path" validate:"required"`
 	Data json.RawMessage `json:"data"`
 }
 
@@ -63,6 +64,12 @@ func parseRequestRawPayload(payload []byte) (*Request, error) {
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return nil, fmt.Errorf("invalid request format: %v", err)
 	}
+
+	validator := validator.New()
+	if err := validator.Struct(req); err != nil {
+		return nil, fmt.Errorf("invalid request: %w", err)
+	}
+
 	return &req, nil
 }
 
