@@ -6,10 +6,9 @@ updates:
       - "[02] to-do"
       - "[03] high-level-framework"
       - "[04] asset-handling"
-      - "[05] alt-da"
-      - "[06] auction"
-      - "[07] delegate-call-voucher"
-      - "[09] dcm"
+      - "[05] interacting-with-the-base-layer"
+      - "[06] delegate-call-voucher"
+      - "[07] auction"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
