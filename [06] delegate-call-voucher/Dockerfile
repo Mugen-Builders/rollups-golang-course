@@ -2,10 +2,8 @@
 
 # This enforces that the packages downloaded from the repositories are the same
 # for the defined date, no matter when the image is built.
-
-ARG APP_NAME=verifier
-ARG UBUNTU_TAG=noble-20250404
-ARG APT_UPDATE_SNAPSHOT=20250424T030400Z
+ARG UBUNTU_TAG=noble-20250529
+ARG APT_UPDATE_SNAPSHOT=20250601T030400Z
 
 ################################################################################
 # riscv64 base stage
@@ -29,14 +27,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 set -eu
 apt-get update
-apt-get install -y --no-install-recommends ca-certificates curl gcc g++-riscv64-linux-gnu
+apt-get install -y --no-install-recommends ca-certificates curl
 apt-get update --snapshot=${APT_UPDATE_SNAPSHOT}
 EOF
 
 ################################################################################
 # cross build stage
 FROM base-cross AS cross-build-stage
-ARG APP_NAME
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
@@ -47,7 +44,7 @@ apt-get install -y --no-install-recommends \
     g++-riscv64-linux-gnu
 EOF
 
-ARG GOVERSION=1.23.0
+ARG GOVERSION=1.23.2
 
 WORKDIR /opt/build
 
@@ -81,7 +78,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 # runtime stage: produces final image that will be executed
 FROM base-riscv64
 
-ARG MACHINE_GUEST_TOOLS_VERSION=0.17.0
+ARG MACHINE_GUEST_TOOLS_VERSION=0.17.1
 ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
 set -e
@@ -90,7 +87,7 @@ apt-get install -y --no-install-recommends \
 
 cd /tmp
 busybox wget https://github.com/cartesi/machine-guest-tools/releases/download/v${MACHINE_GUEST_TOOLS_VERSION}/machine-guest-tools_riscv64.deb
-echo "973943b3a3e40164175da7d7b5b7857642d1277e1fd38be268da12daca5ff458735f93a7ac25b350b3de58b073a25b64c860d9eb92157bfc946b03dd1a345cc9 /tmp/machine-guest-tools_riscv64.deb" \
+echo "96625d97354c1cc905a8630f3d715f64b14bc5b89f3e30913d2eb02da3a01f20a7784d32c2ed340ca401dce4d1bc0e6bebfc3fbb3808725225c5793b16fa6ef4 /tmp/machine-guest-tools_riscv64.deb" \
   | sha512sum -c
 apt-get install -y --no-install-recommends \
   /tmp/machine-guest-tools_riscv64.deb
@@ -99,14 +96,14 @@ rm /tmp/machine-guest-tools_riscv64.deb
 rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 EOF
 
-WORKDIR /opt/cartesi/dapp
+ENV PATH="/opt/cartesi/bin:${PATH}"
 
 RUN chown -R dapp:dapp /opt/cartesi/dapp
 
+WORKDIR /opt/cartesi/dapp
 COPY --from=cross-build-stage /bin/dapp .
 
-ENV PATH="/opt/cartesi/bin:${PATH}"
+ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"
 
 ENTRYPOINT ["rollup-init"]
-
 CMD ["/opt/cartesi/dapp/dapp"]
