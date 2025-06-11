@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -13,12 +14,16 @@ func LoggingMiddleware(handler interface{}) interface{} {
 	switch h := handler.(type) {
 	case AdvanceHandlerFunc:
 		return AdvanceHandlerFunc(func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
-			log.Printf("Advance request - Sender: %s, Deposit: %s, Payload: %s", metadata.MsgSender.String(), deposit.String(), string(payload))
+			res, err := json.Marshal(metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal metadata: %w", err)
+			}
+			log.Printf("Advance request - metadata: %s", string(res))
 			return h(env, metadata, deposit, payload)
 		})
 	case InspectHandlerFunc:
 		return InspectHandlerFunc(func(env rollmelette.EnvInspector, payload []byte) error {
-			log.Printf("Inspect request - Payload: %s", string(payload))
+			log.Printf("Inspect request - payload: %s", string(payload))
 			return h(env, payload)
 		})
 	default:
