@@ -33,11 +33,6 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherSafeTransfer() {
 
 	input := map[string]interface{}{
 		"path": "safe_transfer",
-		"data": map[string]interface{}{
-			"token":  token,
-			"to":     to,
-			"amount": amount,
-		},
 	}
 	payload, err := json.Marshal(input)
 	s.Require().NoError(err)
@@ -82,4 +77,37 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherSafeTransfer() {
 	s.Equal(anyone, unpackedTargeted[1].(common.Address))
 	s.Equal(to, unpackedTargeted[2].(common.Address))
 	s.Equal(halfAmount, unpackedTargeted[3].(*big.Int))
+}
+
+func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyWithdraw() {
+	token := common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
+	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
+	amount := big.NewInt(10000)
+
+	input := map[string]interface{}{
+		"path": "emergency_withdraw",
+	}
+	payload, err := json.Marshal(input)
+	s.Require().NoError(err)
+
+	result := s.tester.DepositERC20(token, to, amount, payload)
+	s.Nil(result.Err)
+	s.Len(result.DelegateCallVouchers, 1)
+	s.Equal(emergencyWithdrawAddress, result.DelegateCallVouchers[0].Destination)
+
+	abiJSON := `[{
+		"type":"function",
+		"name":"emergencyERC20Withdraw",
+		"inputs":[
+			{"type":"address"},
+			{"type":"address"}
+		]
+	}]`
+	emergencyWithdrawABI, err := abi.JSON(strings.NewReader(abiJSON))
+	s.Require().NoError(err)
+
+	unpacked, err := emergencyWithdrawABI.Methods["emergencyERC20Withdraw"].Inputs.Unpack(result.DelegateCallVouchers[0].Payload[4:])
+	s.Require().NoError(err)
+	s.Equal(token, unpacked[0].(common.Address))
+	s.Equal(to, unpacked[1].(common.Address))
 }

@@ -10,10 +10,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/go-playground/validator/v10"
 	"github.com/rollmelette/rollmelette"
 )
 
 var (
+	emergencyWithdrawAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 	safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 	anyone                   = common.HexToAddress("0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
 )
@@ -27,16 +29,41 @@ func (a *Application) Advance(
 	payload []byte,
 ) error {
 	var input struct {
-		Path string          `json:"path"`
+		Path string          `json:"path" validate:"required"`
 		Data json.RawMessage `json:"data"`
 	}
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return err
 	}
 
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return err
+	}
+
 	switch d := deposit.(type) {
 	case *rollmelette.ERC20Deposit:
-		abiJSON := `[{
+		if input.Path == "emergency_withdraw" {
+			abiJSON := `[{
+				"type":"function",
+				"name":"emergencyERC20Withdraw",
+				"inputs":[
+					{"type":"address"},
+					{"type":"address"}
+				]
+			}]`
+			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+			if err != nil {
+				return err
+			}
+			delegateCallVoucher, err := abiInterface.Pack("emergencyERC20Withdraw", d.Token, d.Sender)
+			if err != nil {
+				return err
+			}
+			env.DelegateCallVoucher(emergencyWithdrawAddress, delegateCallVoucher)
+			return nil
+		} else if input.Path == "safe_transfer" {
+			abiJSON := `[{
 				"type":"function",
 				"name":"safeTransfer",
 				"inputs":[
@@ -55,32 +82,34 @@ func (a *Application) Advance(
 					{"type":"uint256"}
 				]
 			}]`
-		abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-		if err != nil {
-			return err
+			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+			if err != nil {
+				return err
+			}
+
+			halfAmount := new(big.Int).Div(d.Amount, big.NewInt(2))
+
+			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
+			if err != nil {
+				return err
+			}
+
+			delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", d.Token, anyone, d.Sender, halfAmount)
+			if err != nil {
+				return err
+			}
+
+			env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Amount))
+
+			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
+			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
+			return nil
 		}
-
-		halfAmount := new(big.Int).Div(d.Amount, big.NewInt(2))
-
-		delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
-		if err != nil {
-			return err
-		}
-
-		delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", d.Token, anyone, d.Sender, halfAmount)
-		if err != nil {
-			return err
-		}
-
-		env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Amount))
-		
-		env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
-		env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
-		return nil
 	default:
 		env.Report([]byte(fmt.Sprintf("Unknown deposit type: %T", d)))
 		return nil
 	}
+	return nil
 }
 
 func (a *Application) Inspect(env rollmelette.EnvInspector, payload []byte) error {
