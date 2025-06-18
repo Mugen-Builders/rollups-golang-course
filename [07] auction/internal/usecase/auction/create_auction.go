@@ -79,7 +79,7 @@ func (c *CreateAuctionUseCase) Execute(ctx context.Context, input *CreateAuction
 		input.Token,
 		Address(erc20Deposit.Sender),
 		Address(erc20Deposit.Token),
-		uint256.MustFromBig(erc20Deposit.Amount),
+		uint256.MustFromBig(erc20Deposit.Value),
 		input.DebtIssued,
 		input.MaxInterestRate,
 		input.ClosesAt,

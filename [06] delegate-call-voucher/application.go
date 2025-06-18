@@ -87,7 +87,7 @@ func (a *Application) Advance(
 				return err
 			}
 
-			halfAmount := new(big.Int).Div(d.Amount, big.NewInt(2))
+			halfAmount := new(big.Int).Div(d.Value, big.NewInt(2))
 
 			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
 			if err != nil {
@@ -99,7 +99,7 @@ func (a *Application) Advance(
 				return err
 			}
 
-			env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Amount))
+			env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Value))
 
 			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
 			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)

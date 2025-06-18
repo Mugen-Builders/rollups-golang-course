@@ -62,7 +62,7 @@ func (h *AuctionAdvanceHandlers) CreateAuction(env rollmelette.Env, metadata rol
 		erc20Deposit.Token,
 		erc20Deposit.Sender,
 		env.AppAddress(),
-		erc20Deposit.Amount,
+		erc20Deposit.Value,
 	); err != nil {
 		return fmt.Errorf("failed to transfer ERC20: %w", err)
 	}

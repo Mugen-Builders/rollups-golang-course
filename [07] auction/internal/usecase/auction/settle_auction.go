@@ -125,7 +125,7 @@ func (uc *SettleAuctionUseCase) Validate(
 		return fmt.Errorf("auction campaign not closed")
 	}
 
-	if deposit.Amount.Cmp(Auction.TotalObligation.ToBig()) < 0 {
+	if deposit.Value.Cmp(Auction.TotalObligation.ToBig()) < 0 {
 		return fmt.Errorf("deposit amount is lower than the total obligation")
 	}
 

@@ -58,7 +58,7 @@ func (h *OrderAdvanceHandlers) CreateOrder(env rollmelette.Env, metadata rollmel
 		erc20Deposit.Token,
 		erc20Deposit.Sender,
 		env.AppAddress(),
-		erc20Deposit.Amount,
+		erc20Deposit.Value,
 	); err != nil {
 		return fmt.Errorf("failed to transfer ERC20: %w", err)
 	}

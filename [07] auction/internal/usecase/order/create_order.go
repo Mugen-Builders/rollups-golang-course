@@ -64,7 +64,7 @@ func (c *CreateOrderUseCase) Execute(ctx context.Context, input *CreateOrderInpu
 	order, err := domain.NewOrder(
 		auction.Id,
 		Address(erc20Deposit.Sender),
-		uint256.MustFromBig(erc20Deposit.Amount),
+		uint256.MustFromBig(erc20Deposit.Value),
 		input.InterestRate,
 		metadata.BlockTimestamp,
 	)
