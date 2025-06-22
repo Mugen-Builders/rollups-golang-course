@@ -19,7 +19,6 @@ func (a *Application) Advance(
 ) error {
 	switch d := deposit.(type) {
 	case *rollmelette.EtherDeposit:
-
 		env.Notice([]byte(fmt.Sprintf("1 - Ether balance of %s: %d, before transfer to 0x0000000000000000000000000000000000000000", d.Sender, env.EtherBalanceOf(d.Sender))))
 		env.EtherTransfer(d.Sender, common.HexToAddress("0x0000000000000000000000000000000000000000"), d.Value)
 
@@ -36,7 +35,6 @@ func (a *Application) Advance(
 
 		env.Notice([]byte(fmt.Sprintf("4 - Ether balance of %s: %d after withdraw", d.Sender, env.EtherBalanceOf(d.Sender))))
 	case *rollmelette.ERC20Deposit:
-
 		env.Notice([]byte(fmt.Sprintf("1 - ERC20 balance of %s: %d before transfer to 0x0000000000000000000000000000000000000000", d.Sender, env.ERC20BalanceOf(d.Token, d.Sender))))
 		env.ERC20Transfer(d.Token, d.Sender, common.HexToAddress("0x0000000000000000000000000000000000000000"), d.Value)
 
