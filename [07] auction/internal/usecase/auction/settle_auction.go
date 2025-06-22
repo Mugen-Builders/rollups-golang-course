@@ -129,5 +129,8 @@ func (uc *SettleAuctionUseCase) Validate(
 		return fmt.Errorf("deposit amount is lower than the total obligation")
 	}
 
+	if Auction.Creator != Address(deposit.Sender) {
+		return fmt.Errorf("only the auction creator can settle the auction")
+	}
 	return nil
 }
