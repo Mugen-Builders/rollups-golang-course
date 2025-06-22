@@ -34,7 +34,7 @@ func (s *MyApplicationSuite) TestMintNFT() {
 	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
 	uri := "https://example.com"
 	input := map[string]interface{}{
-		"path": "mintNFT",
+		"path": "mint_path",
 		"data": map[string]interface{}{
 			"token": token,
 			"to":    to,
@@ -74,16 +74,18 @@ func (s *MyApplicationSuite) TestDeployContract() {
 
 	uint256Type, err := abi.NewType("uint256", "", nil)
 	s.Require().NoError(err)
+	
 	args := abi.Arguments{{Type: uint256Type}}
-	encodedArgs, err := args.Pack(big.NewInt(1596))
+	packedArgs, err := args.Pack(big.NewInt(1596))
 	s.Require().NoError(err)
 
+	combinedBytecode := append(bytecode, packedArgs...)
+
 	input := map[string]interface{}{
-		"path": "deployContract",
+		"path": "deploy_contract",
 		"data": map[string]interface{}{
-			"proxy_deployer": common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa"),
-			"bytecode":       bytecode,
-			"encoded_args":   encodedArgs,
+			"deployer": common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa"),
+			"bytecode": combinedBytecode,
 		},
 	}
 	payload, err := json.Marshal(input)
@@ -103,5 +105,5 @@ func (s *MyApplicationSuite) TestDeployContract() {
 	unpacked, err := deployABI.Methods["deploy"].Inputs.Unpack(result.Vouchers[0].Payload[4:])
 	s.Require().NoError(err)
 
-	s.Equal(append(bytecode, encodedArgs...), unpacked[0].([]byte))
+	s.Equal(combinedBytecode, unpacked[0].([]byte))
 }

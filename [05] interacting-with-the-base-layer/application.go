@@ -3,18 +3,20 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/go-playground/validator/v10"
 	"github.com/rollmelette/rollmelette"
 )
 
 type Application struct{}
 
-func (a *Application) mintNFT(to common.Address, uri string) ([]byte, error) {
+func (a *Application) MintNFT(to common.Address, uri string) ([]byte, error) {
 	abiJSON := `[{
 		"type":"function",
 		"name":"safeMint",
@@ -34,7 +36,7 @@ func (a *Application) mintNFT(to common.Address, uri string) ([]byte, error) {
 	return voucher, nil
 }
 
-func (a *Application) deployContract(bytecode, encodedArgs []byte) ([]byte, error) {
+func (a *Application) DeployContract(bytecode []byte) ([]byte, error) {
 	abiJSON := `[{
 		"type":"function",
 		"name":"deploy",
@@ -47,9 +49,7 @@ func (a *Application) deployContract(bytecode, encodedArgs []byte) ([]byte, erro
 		return nil, err
 	}
 
-	encoded := append(bytecode, encodedArgs...)
-
-	voucher, err := abiInterface.Pack("deploy", encoded)
+	voucher, err := abiInterface.Pack("deploy", bytecode)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +70,13 @@ func (a *Application) Advance(
 		return err
 	}
 
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+
 	switch input.Path {
-	case "mintNFT":
+	case "mint_path":
 		var mintNFTInput struct {
 			Token common.Address `json:"token"`
 			To    common.Address `json:"to"`
@@ -80,25 +85,28 @@ func (a *Application) Advance(
 		if err := json.Unmarshal(input.Data, &mintNFTInput); err != nil {
 			return err
 		}
-		voucher, err := a.mintNFT(mintNFTInput.To, mintNFTInput.URI)
+		voucher, err := a.MintNFT(mintNFTInput.To, mintNFTInput.URI)
 		if err != nil {
 			return err
 		}
 		env.Voucher(mintNFTInput.Token, big.NewInt(0), voucher)
-	case "deployContract":
+	case "deploy_contract":
 		var deployContractInput struct {
-			ProxyDeployer common.Address `json:"proxy_deployer"`
-			Bytecode      []byte         `json:"bytecode"`
-			EncodedArgs   []byte         `json:"encoded_args"`
+			Deployer common.Address `json:"deployer"`
+			Bytecode []byte         `json:"bytecode"`
 		}
 		if err := json.Unmarshal(input.Data, &deployContractInput); err != nil {
 			return err
 		}
-		voucher, err := a.deployContract(deployContractInput.Bytecode, deployContractInput.EncodedArgs)
+		voucher, err := a.DeployContract(deployContractInput.Bytecode)
 		if err != nil {
 			return err
 		}
-		env.Voucher(deployContractInput.ProxyDeployer, big.NewInt(0), voucher)
+		env.Voucher(deployContractInput.Deployer, big.NewInt(0), voucher)
+	default:
+		// using report to log an error
+		env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))
+		return fmt.Errorf("unknown path: %s", input.Path)
 	}
 	return nil
 }
