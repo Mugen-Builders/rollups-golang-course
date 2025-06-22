@@ -34,7 +34,7 @@ func (s *MyApplicationSuite) TestMintNFT() {
 	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
 	uri := "https://example.com"
 	input := map[string]interface{}{
-		"path": "mint_path",
+		"path": "mint_nft",
 		"data": map[string]interface{}{
 			"token": token,
 			"to":    to,
@@ -74,7 +74,7 @@ func (s *MyApplicationSuite) TestDeployContract() {
 
 	uint256Type, err := abi.NewType("uint256", "", nil)
 	s.Require().NoError(err)
-	
+
 	args := abi.Arguments{{Type: uint256Type}}
 	packedArgs, err := args.Pack(big.NewInt(1596))
 	s.Require().NoError(err)

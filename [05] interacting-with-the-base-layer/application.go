@@ -76,7 +76,7 @@ func (a *Application) Advance(
 	}
 
 	switch input.Path {
-	case "mint_path":
+	case "mint_nft":
 		var mintNFTInput struct {
 			Token common.Address `json:"token"`
 			To    common.Address `json:"to"`
