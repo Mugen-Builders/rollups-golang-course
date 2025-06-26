@@ -33,7 +33,7 @@ func (uc *DeleteVotingOptionUseCase) Execute(ctx context.Context, input *DeleteV
 	if votingOption.Voting == nil {
 		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("voting not found")
 	}
-	if votingOption.Voting.Issuer != Address(metadata.MsgSender) {
+	if votingOption.Voting.Creator != Address(metadata.MsgSender) {
 		return &DeleteVotingOptionOutputDTO{Success: false}, errors.New("unauthorized")
 	}
 	err = uc.VotingOptionRepository.DeleteOption(input.Id)

@@ -136,7 +136,7 @@ func (s *VotingSystemSuite) TestInspectVotingHandlers() {
 	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
-	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","issuer":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
+	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","Creator":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
 
 	// Test FindAll
 	findAllInput := []byte(`{"path":"voting","data":{}}`)
@@ -198,7 +198,7 @@ func (s *VotingSystemSuite) TestInspectVotingOptionHandlers() {
 	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
-	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","issuer":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
+	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","Creator":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
 
 	createOptionInput := []byte(`{"path":"voting-option/create","data":{"voting_id":1}}`)
 	result = s.tester.Advance(candidate, createOptionInput)
@@ -229,7 +229,7 @@ func (s *VotingSystemSuite) TestVotingWorkflow() {
 	createVotingInput := []byte(fmt.Sprintf(`{"path":"voting/create","data":{"title":"Test Voting","start_date":%d,"end_date":%d}}`, startDate, endDate))
 	result := s.tester.Advance(candidate, createVotingInput)
 	s.Len(result.Notices, 1)
-	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","issuer":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
+	s.Equal(fmt.Sprintf(`voting created - {"id":1,"title":"Test Voting","Creator":"%s","status":"open","start_date":%d,"end_date":%d}`, candidate.Hex(), startDate, endDate), string(result.Notices[0].Payload))
 
 	createVoterInput := []byte(`{"path":"voter/create","data":{}}`)
 	result = s.tester.Advance(admin, createVoterInput)

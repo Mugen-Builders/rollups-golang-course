@@ -24,17 +24,17 @@ const (
 type Voting struct {
 	ID        int             `gorm:"primaryKey;autoIncrement"`
 	Title     string          `gorm:"not null"`
-	Issuer    Address         `gorm:"not null"`
+	Creator   Address         `gorm:"not null"`
 	StartDate time.Time       `gorm:"not null;index"`
 	EndDate   time.Time       `gorm:"not null;index"`
 	Status    VotingStatus    `gorm:"not null;type:string;default:'open'"`
 	Options   []*VotingOption `gorm:"foreignKey:VotingID"`
 }
 
-func NewVoting(title string, issuer Address, startDate, endDate time.Time) (*Voting, error) {
+func NewVoting(title string, Creator Address, startDate, endDate time.Time) (*Voting, error) {
 	voting := &Voting{
 		Title:     title,
-		Issuer:    issuer,
+		Creator:   Creator,
 		StartDate: startDate,
 		EndDate:   endDate,
 		Status:    VotingStatusOpen,
@@ -64,8 +64,8 @@ func (v *Voting) validate() error {
 	if v.StartDate.Before(time.Now()) {
 		return fmt.Errorf("%w: start date must be in the future", ErrInvalidVoting)
 	}
-	if v.Issuer == (Address{}) {
-		return fmt.Errorf("%w: issuer cannot be empty", ErrInvalidVoting)
+	if v.Creator == (Address{}) {
+		return fmt.Errorf("%w: Creator cannot be empty", ErrInvalidVoting)
 	}
 	if v.Status != VotingStatusOpen && v.Status != VotingStatusClosed {
 		return fmt.Errorf("%w: invalid status", ErrInvalidVoting)
