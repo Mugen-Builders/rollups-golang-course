@@ -1,6 +1,6 @@
 [drives.root]
 builder = "docker"
-dockerfile = "./build/Dockerfile.rootfs"
+dockerfile = "./build/Dockerfile"
 format = "ext2"
 
 [drives.data]
