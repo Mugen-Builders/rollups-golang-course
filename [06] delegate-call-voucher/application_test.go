@@ -79,18 +79,21 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherSafeTransfer() {
 	s.Equal(halfAmount, unpackedTargeted[3].(*big.Int))
 }
 
-func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyWithdraw() {
+func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyERC20Withdraw() {
 	token := common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
 	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
-	amount := big.NewInt(10000)
 
 	input := map[string]interface{}{
-		"path": "emergency_withdraw",
+		"path": "emergency_erc20_withdraw",
+		"data": map[string]interface{}{
+			"token": token,
+			"to":    to,
+		},
 	}
 	payload, err := json.Marshal(input)
 	s.Require().NoError(err)
 
-	result := s.tester.DepositERC20(token, to, amount, payload)
+	result := s.tester.Advance(to, payload)
 	s.Nil(result.Err)
 	s.Len(result.DelegateCallVouchers, 1)
 	s.Equal(emergencyWithdrawAddress, result.DelegateCallVouchers[0].Destination)
@@ -110,4 +113,36 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyWithdraw() 
 	s.Require().NoError(err)
 	s.Equal(token, unpacked[0].(common.Address))
 	s.Equal(to, unpacked[1].(common.Address))
+}
+
+func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyETHWithdraw() {
+	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
+
+	input := map[string]interface{}{
+		"path": "emergency_eth_withdraw",
+		"data": map[string]interface{}{
+			"to": to,
+		},
+	}
+	payload, err := json.Marshal(input)
+	s.Require().NoError(err)
+
+	result := s.tester.Advance(to, payload)
+	s.Nil(result.Err)
+	s.Len(result.DelegateCallVouchers, 1)
+	s.Equal(emergencyWithdrawAddress, result.DelegateCallVouchers[0].Destination)
+
+	abiJSON := `[{
+		"type":"function",
+		"name":"emergencyETHWithdraw",
+		"inputs":[
+			{"type":"address"}
+		]
+	}]`
+	emergencyETHWithdrawABI, err := abi.JSON(strings.NewReader(abiJSON))
+	s.Require().NoError(err)
+
+	unpacked, err := emergencyETHWithdrawABI.Methods["emergencyETHWithdraw"].Inputs.Unpack(result.DelegateCallVouchers[0].Payload[4:])
+	s.Require().NoError(err)
+	s.Equal(to, unpacked[0].(common.Address))
 }

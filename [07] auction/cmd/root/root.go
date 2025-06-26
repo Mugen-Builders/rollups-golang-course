@@ -42,7 +42,7 @@ func run(cmd *cobra.Command, args []string) {
 	repo, err := factory.NewRepositoryFromConnectionString(
 		map[bool]string{
 			true:  "sqlite://:memory:",
-			false: "sqlite://auction.db",
+			false: "sqlite:///mnt/data/auction.db",
 		}[useMemoryDB],
 	)
 	if err != nil {

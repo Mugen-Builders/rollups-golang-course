@@ -1,4 +1,4 @@
-package inspect_handler
+package inspect
 
 import (
 	"encoding/json"

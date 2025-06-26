@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"os"
 
-	advance "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/advance"
-	inspect_handler "github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/inspect"
+	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/advance"
+	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/inspect"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository/factory"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/router"
@@ -42,7 +42,7 @@ func run(cmd *cobra.Command, args []string) {
 	repo, err := factory.NewRepositoryFromConnectionString(
 		map[bool]string{
 			true:  "sqlite://:memory:",
-			false: "sqlite://voting.db",
+			false: "sqlite:///mnt/data/voting.db",
 		}[useMemoryDB],
 	)
 	if err != nil {
@@ -62,13 +62,13 @@ func run(cmd *cobra.Command, args []string) {
 
 func NewVotingSystem(repo repository.Repository) *router.Router {
 	votingAdvanceHandlers := advance.NewVotingAdvanceHandlers(repo)
-	votingInspectHandlers := inspect_handler.NewVotingInspectHandlers(repo, repo)
+	votingInspectHandlers := inspect.NewVotingInspectHandlers(repo, repo)
 
 	voterAdvanceHandlers := advance.NewVoterAdvanceHandlers(repo)
-	voterInspectHandlers := inspect_handler.NewVoterInspectHandlers(repo)
+	voterInspectHandlers := inspect.NewVoterInspectHandlers(repo)
 
 	votingOptionAdvanceHandlers := advance.NewVotingOptionAdvanceHandlers(repo, repo)
-	votingOptionInspectHandlers := inspect_handler.NewVotingOptionInspectHandlers(repo)
+	votingOptionInspectHandlers := inspect.NewVotingOptionInspectHandlers(repo)
 
 	r := router.NewRouter()
 	r.Use(router.LoggingMiddleware)

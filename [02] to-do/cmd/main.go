@@ -21,7 +21,7 @@ var (
 	errlog  = log.New(os.Stderr, "[ error ] ", log.Lshortfile)
 )
 
-func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *inspect_handler.ToDoInspectHandlers) error {
+func DappStrategy(response *rollups.FinishResponse, router *rollups.Router, ih *inspect.ToDoInspectHandlers) error {
 	switch response.Type {
 	case "advance_state":
 		var data rollups.AdvanceResponse
@@ -57,7 +57,7 @@ func main() {
 	}
 	infolog.Println("Advance handlers initialized")
 
-	ih := inspect_handler.NewToDoInspectHandlers(toDoRepository)
+	ih := inspect.NewToDoInspectHandlers(toDoRepository)
 	if err != nil {
 		errlog.Panicln("Failed to initialize inspect handlers", "error", err)
 	}

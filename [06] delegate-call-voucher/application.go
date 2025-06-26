@@ -41,74 +41,112 @@ func (a *Application) Advance(
 		return err
 	}
 
-	switch d := deposit.(type) {
-	case *rollmelette.ERC20Deposit:
-		if input.Path == "emergency_withdraw" {
-			abiJSON := `[{
-				"type":"function",
-				"name":"emergencyERC20Withdraw",
-				"inputs":[
-					{"type":"address"},
-					{"type":"address"}
-				]
-			}]`
-			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-			if err != nil {
-				return err
-			}
-			delegateCallVoucher, err := abiInterface.Pack("emergencyERC20Withdraw", d.Token, d.Sender)
-			if err != nil {
-				return err
-			}
-			env.DelegateCallVoucher(emergencyWithdrawAddress, delegateCallVoucher)
-			return nil
-		} else if input.Path == "safe_transfer" {
-			abiJSON := `[{
-				"type":"function",
-				"name":"safeTransfer",
-				"inputs":[
-					{"type":"address"},
-					{"type":"address"},
-					{"type":"uint256"}
-				]
-			},
-			{
-				"type":"function",
-				"name":"safeTransferTargeted",
-				"inputs":[
-					{"type":"address"},
-					{"type":"address"},
-					{"type":"address"},
-					{"type":"uint256"}
-				]
-			}]`
-			abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-			if err != nil {
-				return err
-			}
+	if deposit != nil {
+		switch d := deposit.(type) {
+		case *rollmelette.ERC20Deposit:
+			if input.Path == "safe_transfer" {
+				abiJSON := `[{
+					"type":"function",
+					"name":"safeTransfer",
+					"inputs":[
+						{"type":"address"},
+						{"type":"address"},
+						{"type":"uint256"}
+					]
+				},
+				{
+					"type":"function",
+					"name":"safeTransferTargeted",
+					"inputs":[
+						{"type":"address"},
+						{"type":"address"},
+						{"type":"address"},
+						{"type":"uint256"}
+					]
+				}]`
+				abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+				if err != nil {
+					return err
+				}
 
-			halfAmount := new(big.Int).Div(d.Value, big.NewInt(2))
+				halfAmount := new(big.Int).Div(d.Value, big.NewInt(2))
 
-			delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
-			if err != nil {
-				return err
+				delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
+				if err != nil {
+					return err
+				}
+
+				delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", d.Token, anyone, d.Sender, halfAmount)
+				if err != nil {
+					return err
+				}
+
+				env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Value))
+
+				env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
+				env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
+				return nil
 			}
-
-			delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", d.Token, anyone, d.Sender, halfAmount)
-			if err != nil {
-				return err
-			}
-
-			env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Value))
-
-			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
-			env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
+		default:
+			env.Report([]byte(fmt.Sprintf("Unknown deposit type: %T", d)))
 			return nil
 		}
-	default:
-		env.Report([]byte(fmt.Sprintf("Unknown deposit type: %T", d)))
+	}
+
+	switch input.Path {
+	case "emergency_erc20_withdraw":
+		var emergencyInput struct {
+			Token common.Address `json:"token"`
+			To    common.Address `json:"to"`
+		}
+		if err := json.Unmarshal(input.Data, &emergencyInput); err != nil {
+			return err
+		}
+		abiJSON := `[{
+			"type":"function",
+			"name":"emergencyERC20Withdraw",
+			"inputs":[
+				{"type":"address"},
+				{"type":"address"}
+			]
+		}]`
+		abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+		if err != nil {
+			return err
+		}
+		delegateCallVoucher, err := abiInterface.Pack("emergencyERC20Withdraw", emergencyInput.Token, emergencyInput.To)
+		if err != nil {
+			return err
+		}
+		env.DelegateCallVoucher(emergencyWithdrawAddress, delegateCallVoucher)
+		return nil
+
+	case "emergency_eth_withdraw":
+		var emergencyInput struct {
+			To common.Address `json:"to"`
+		}
+		if err := json.Unmarshal(input.Data, &emergencyInput); err != nil {
+			return err
+		}
+		abiJSON := `[{
+			"type":"function",
+			"name":"emergencyETHWithdraw",
+			"inputs":[
+				{"type":"address"}
+			]
+		}]`
+		abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+		if err != nil {
+			return err
+		}
+		delegateCallVoucher, err := abiInterface.Pack("emergencyETHWithdraw", emergencyInput.To)
+		if err != nil {
+			return err
+		}
+		env.DelegateCallVoucher(emergencyWithdrawAddress, delegateCallVoucher)
 		return nil
 	}
+
 	return nil
 }
 

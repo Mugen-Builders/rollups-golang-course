@@ -8,5 +8,11 @@ contract EmergencyWithdraw {
     function emergencyERC20Withdraw(IERC20 token, address to) public {
         token.transfer(to, token.balanceOf(address(this)));
     }
-    // TODO: add other tokens support
+    
+    function emergencyETHWithdraw(address to) public {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No ETH to withdraw");
+        (bool success, ) = to.call{value: balance}("");
+        require(success, "ETH transfer failed");
+    }
 }
