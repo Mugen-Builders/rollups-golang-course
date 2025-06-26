@@ -19,7 +19,7 @@ type CreateVotingInputDTO struct {
 type CreateVotingOutputDTO struct {
 	Id        int     `json:"id"`
 	Title     string  `json:"title"`
-	Creator   Address `json:"creator"`
+	Issuer    Address `json:"issuer"`
 	Status    string  `json:"status"`
 	StartDate int64   `json:"start_date"`
 	EndDate   int64   `json:"end_date"`
@@ -47,7 +47,7 @@ func (uc *CreateVotingUseCase) Execute(ctx context.Context, input *CreateVotingI
 	return &CreateVotingOutputDTO{
 		Id:        voting.ID,
 		Title:     voting.Title,
-		Creator:   voting.Creator,
+		Issuer:    voting.Issuer,
 		Status:    string(voting.Status),
 		StartDate: voting.GetStartDateUnix(),
 		EndDate:   voting.GetEndDateUnix(),

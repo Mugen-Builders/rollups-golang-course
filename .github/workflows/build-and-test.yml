@@ -21,7 +21,7 @@ jobs:
           "[04] asset-handling",
           "[05] interacting-with-the-base-layer",
           "[06] delegate-call-voucher",
-          "[07] auction",
+          "[07] dcm",
         ]
     steps:
       - name: Checkout

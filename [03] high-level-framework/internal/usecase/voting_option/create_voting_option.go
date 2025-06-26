@@ -41,7 +41,7 @@ func (uc *CreateVotingOptionUseCase) Execute(ctx context.Context, input *CreateV
 	if err != nil {
 		return nil, err
 	}
-	if voting.Creator != Address(metadata.MsgSender) {
+	if voting.Issuer != Address(metadata.MsgSender) {
 		return nil, errors.New("unauthorized")
 	}
 	option, err := domain.NewVotingOption(input.VotingID)

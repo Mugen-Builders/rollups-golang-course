@@ -30,7 +30,7 @@ func (uc *DeleteVotingUseCase) Execute(ctx context.Context, input *DeleteVotingI
 	if err != nil {
 		return &DeleteVotingOutputDTO{Success: false}, err
 	}
-	if voting.Creator != Address(metadata.MsgSender) {
+	if voting.Issuer != Address(metadata.MsgSender) {
 		return &DeleteVotingOutputDTO{Success: false}, errors.New("unauthorized")
 	}
 	err = uc.VotingRepository.DeleteVoting(input.Id)
