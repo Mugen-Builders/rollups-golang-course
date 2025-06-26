@@ -46,7 +46,7 @@ func main() {
 	// 	errlog.Panicln("Failed to initialize repository", "error", err)
 	// }
 
-	toDoRepository, err := factory.NewRepositoryFromConnectionString(ctx, "sqlite://database.db")
+	toDoRepository, err := factory.NewRepositoryFromConnectionString(ctx, "sqlite:///mnt/data/database.db")
 	if err != nil {
 		errlog.Panicln("Failed to initialize repository", "error", err)
 	}
