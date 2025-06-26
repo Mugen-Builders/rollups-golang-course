@@ -9,7 +9,7 @@ import (
 type FindCampaignOutputDTO struct {
 	Id                uint            `json:"id"`
 	Token             Address         `json:"token"`
-	Issuer            Address         `json:"issuer"`
+	Debtor            Address         `json:"debtor"`
 	CollateralAddress Address         `json:"collateral_address"`
 	CollateralAmount  *uint256.Int    `json:"collateral_amount"`
 	DebtIssued        *uint256.Int    `json:"debt_issued"`

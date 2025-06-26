@@ -86,8 +86,8 @@ func (h *CampaignInspectHandlers) FindCampaignsByInvestor(env rollmelette.EnvIns
 	return nil
 }
 
-func (h *CampaignInspectHandlers) FindCampaignsByIssuer(env rollmelette.EnvInspector, payload []byte) error {
-	var input campaign.FindCampaignsByIssuerInputDTO
+func (h *CampaignInspectHandlers) FindCampaignsByDebtor(env rollmelette.EnvInspector, payload []byte) error {
+	var input campaign.FindCampaignsByDebtorInputDTO
 	if err := json.Unmarshal(payload, &input); err != nil {
 		return fmt.Errorf("failed to unmarshal input: %w", err)
 	}
@@ -98,10 +98,10 @@ func (h *CampaignInspectHandlers) FindCampaignsByIssuer(env rollmelette.EnvInspe
 	}
 
 	ctx := context.Background()
-	findCampaignsByIssuer := campaign.NewFindCampaignsByIssuerUseCase(h.CampaignRepository)
-	res, err := findCampaignsByIssuer.Execute(ctx, &input)
+	findCampaignsByDebtor := campaign.NewFindCampaignsByDebtorUseCase(h.CampaignRepository)
+	res, err := findCampaignsByDebtor.Execute(ctx, &input)
 	if err != nil {
-		return fmt.Errorf("failed to find campaigns by issuer: %w", err)
+		return fmt.Errorf("failed to find campaigns by debtor: %w", err)
 	}
 	campaigns, err := json.Marshal(res)
 	if err != nil {

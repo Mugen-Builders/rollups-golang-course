@@ -45,7 +45,7 @@ func (f *FindCampaignsByInvestorUseCase) Execute(ctx context.Context, input *Fin
 		output[i] = &FindCampaignOutputDTO{
 			Id:                Campaign.Id,
 			Token:             Campaign.Token,
-			Issuer:            Campaign.Issuer,
+			Debtor:            Campaign.Debtor,
 			CollateralAddress: Campaign.CollateralAddress,
 			CollateralAmount:  Campaign.CollateralAmount,
 			DebtIssued:        Campaign.DebtIssued,

@@ -13,13 +13,13 @@ import (
 )
 
 type CloseCampaignInputDTO struct {
-	Issuer Address `json:"issuer" validate:"required"`
+	Debtor Address `json:"debtor" validate:"required"`
 }
 
 type CloseCampaignOutputDTO struct {
 	Id                uint            `json:"id"`
 	Token             Address         `json:"token,omitempty"`
-	Issuer            Address         `json:"issuer,omitempty"`
+	Debtor            Address         `json:"debtor,omitempty"`
 	CollateralAddress Address         `json:"collateral_address,omitempty"`
 	CollateralAmount  *uint256.Int    `json:"collateral_amount,omitempty"`
 	DebtIssued        *uint256.Int    `json:"debt_issued,omitempty"`
@@ -48,9 +48,9 @@ func NewCloseCampaignUseCase(CampaignRepository repository.CampaignRepository, o
 
 func (u *CloseCampaignUseCase) Execute(ctx context.Context, input *CloseCampaignInputDTO, metadata rollmelette.Metadata) (*CloseCampaignOutputDTO, error) {
 	// -------------------------------------------------------------------------
-	// 1. Find ongoing campaign for the issuer
+	// 1. Find ongoing campaign for the debtor
 	// -------------------------------------------------------------------------
-	campaigns, err := u.CampaignRepository.FindCampaignsByIssuer(ctx, input.Issuer)
+	campaigns, err := u.CampaignRepository.FindCampaignsByDebtor(ctx, input.Debtor)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (u *CloseCampaignUseCase) Execute(ctx context.Context, input *CloseCampaign
 	return &CloseCampaignOutputDTO{
 		Id:                res.Id,
 		Token:             res.Token,
-		Issuer:            res.Issuer,
+		Debtor:            res.Debtor,
 		CollateralAddress: res.CollateralAddress,
 		CollateralAmount:  res.CollateralAmount,
 		DebtIssued:        res.DebtIssued,

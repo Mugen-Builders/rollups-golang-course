@@ -4,7 +4,7 @@
 </p>
 <br>
 <div align="center">
-    <i>A Linux-powered EVM rollup serving as a Debt Capital Market for the issuer economy</i>
+    <i>A Linux-powered EVM rollup serving as a Debt Capital Market for the debtor economy</i>
 </div>
 <div align="center">
 <b>Tokenized debt issuance through reverse campaign mechanism with collateralization</b>
@@ -25,7 +25,7 @@
 
 ##  Overview
 
-A debt capital market platform designed for the issuer economy, enabling content issuers to monetize their influence by issuing tokenized debt instruments collateralized. Through a reverse campaign mechanism, the platform connects issuers with investors, offering a structured and transparent alternative to finance scalable businesses while leveraging the economic potential of their audiences, ensuring legal compliance and attractive returns for investors.
+A debt capital market platform designed for the debtor economy, enabling content debtors to monetize their influence by issuing tokenized debt instruments collateralized. Through a reverse campaign mechanism, the platform connects debtors with investors, offering a structured and transparent alternative to finance scalable businesses while leveraging the economic potential of their audiences, ensuring legal compliance and attractive returns for investors.
 <br>
 
 [![Docs]][Link-docs] [![Deck]][Link-deck]

@@ -21,7 +21,7 @@ var (
 	Cmd         = &cobra.Command{
 		Use:   "dcm-" + CMD_NAME,
 		Short: "Runs DCM Rollup",
-		Long:  `A Linux-powered EVM rollup serving as a Debt Capital Market for the issuer economy`,
+		Long:  `A Linux-powered EVM rollup serving as a Debt Capital Market for the debtor economy`,
 		Run:   run,
 	}
 )
@@ -84,16 +84,16 @@ func NewDCMSystem(repo repository.Repository) *router.Router {
 
 	campaignGroup := r.Group("campaign")
 	{
-		issuerGroup := campaignGroup.Group("issuer")
-		issuerGroup.Use(rbacFactory.IssuerOnly())
-		issuerGroup.HandleAdvance("create", handlers.CampaignAdvanceHandlers.CreateCampaign)
-		issuerGroup.HandleAdvance("settle", handlers.CampaignAdvanceHandlers.SettleCampaign)
+		debtorGroup := campaignGroup.Group("debtor")
+		debtorGroup.Use(rbacFactory.DebtorOnly())
+		debtorGroup.HandleAdvance("create", handlers.CampaignAdvanceHandlers.CreateCampaign)
+		debtorGroup.HandleAdvance("settle", handlers.CampaignAdvanceHandlers.SettleCampaign)
 
 		// Public operations
 		campaignGroup.HandleInspect("", handlers.CampaignInspectHandlers.FindAllCampaigns)
 		campaignGroup.HandleInspect("id", handlers.CampaignInspectHandlers.FindCampaignById)
 		campaignGroup.HandleAdvance("close", handlers.CampaignAdvanceHandlers.CloseCampaign)
-		campaignGroup.HandleInspect("issuer", handlers.CampaignInspectHandlers.FindCampaignsByIssuer)
+		campaignGroup.HandleInspect("debtor", handlers.CampaignInspectHandlers.FindCampaignsByDebtor)
 		campaignGroup.HandleInspect("investor", handlers.CampaignInspectHandlers.FindCampaignsByInvestor)
 		campaignGroup.HandleAdvance("execute-collateral", handlers.CampaignAdvanceHandlers.ExecuteCampaignCollateral)
 	}

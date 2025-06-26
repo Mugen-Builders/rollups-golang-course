@@ -22,7 +22,7 @@ type CreateCampaignInputDTO struct {
 type CreateCampaignOutputDTO struct {
 	Id                uint            `json:"id"`
 	Token             Address         `json:"token,omitempty"`
-	Issuer            Address         `json:"issuer,omitempty"`
+	Debtor            Address         `json:"debtor,omitempty"`
 	CollateralAddress Address         `json:"collateral_address,omitempty"`
 	CollateralAmount  *uint256.Int    `json:"collateral_amount,omitempty"`
 	DebtIssued        *uint256.Int    `json:"debt_issued"`
@@ -64,7 +64,7 @@ func (c *CreateCampaignUseCase) Execute(ctx context.Context, input *CreateCampai
 		return nil, err
 	}
 
-	campaigns, err := c.CampaignRepository.FindCampaignsByIssuer(ctx, Address(erc20Deposit.Sender))
+	campaigns, err := c.CampaignRepository.FindCampaignsByDebtor(ctx, Address(erc20Deposit.Sender))
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving Campaigns: %w", err)
 	}
@@ -97,7 +97,7 @@ func (c *CreateCampaignUseCase) Execute(ctx context.Context, input *CreateCampai
 	return &CreateCampaignOutputDTO{
 		Id:                createdCampaign.Id,
 		Token:             createdCampaign.Token,
-		Issuer:            createdCampaign.Issuer,
+		Debtor:            createdCampaign.Debtor,
 		CollateralAddress: createdCampaign.CollateralAddress,
 		CollateralAmount:  createdCampaign.CollateralAmount,
 		DebtIssued:        createdCampaign.DebtIssued,

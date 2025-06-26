@@ -8,26 +8,26 @@ import (
 	. "github.com/henriquemarlon/cartesi-golang-series/dcm/pkg/custom_type"
 )
 
-type FindCampaignsByIssuerInputDTO struct {
-	Issuer Address `json:"issuer" validate:"required"`
+type FindCampaignsByDebtorInputDTO struct {
+	Debtor Address `json:"debtor" validate:"required"`
 }
 
-type FindCampaignsByIssuerOutputDTO []*FindCampaignOutputDTO
+type FindCampaignsByDebtorOutputDTO []*FindCampaignOutputDTO
 
-type FindCampaignsByIssuerUseCase struct {
+type FindCampaignsByDebtorUseCase struct {
 	CampaignRepository repository.CampaignRepository
 }
 
-func NewFindCampaignsByIssuerUseCase(CampaignRepository repository.CampaignRepository) *FindCampaignsByIssuerUseCase {
-	return &FindCampaignsByIssuerUseCase{CampaignRepository: CampaignRepository}
+func NewFindCampaignsByDebtorUseCase(CampaignRepository repository.CampaignRepository) *FindCampaignsByDebtorUseCase {
+	return &FindCampaignsByDebtorUseCase{CampaignRepository: CampaignRepository}
 }
 
-func (f *FindCampaignsByIssuerUseCase) Execute(ctx context.Context, input *FindCampaignsByIssuerInputDTO) (*FindCampaignsByIssuerOutputDTO, error) {
-	res, err := f.CampaignRepository.FindCampaignsByIssuer(ctx, input.Issuer)
+func (f *FindCampaignsByDebtorUseCase) Execute(ctx context.Context, input *FindCampaignsByDebtorInputDTO) (*FindCampaignsByDebtorOutputDTO, error) {
+	res, err := f.CampaignRepository.FindCampaignsByDebtor(ctx, input.Debtor)
 	if err != nil {
 		return nil, err
 	}
-	output := make(FindCampaignsByIssuerOutputDTO, len(res))
+	output := make(FindCampaignsByDebtorOutputDTO, len(res))
 	for i, Campaign := range res {
 		orders := make([]*entity.Order, len(Campaign.Orders))
 		for j, order := range Campaign.Orders {
@@ -45,7 +45,7 @@ func (f *FindCampaignsByIssuerUseCase) Execute(ctx context.Context, input *FindC
 		output[i] = &FindCampaignOutputDTO{
 			Id:                Campaign.Id,
 			Token:             Campaign.Token,
-			Issuer:            Campaign.Issuer,
+			Debtor:            Campaign.Debtor,
 			CollateralAddress: Campaign.CollateralAddress,
 			CollateralAmount:  Campaign.CollateralAmount,
 			DebtIssued:        Campaign.DebtIssued,

@@ -9,7 +9,7 @@ import (
 
 type CampaignRepository interface {
 	CreateCampaign(ctx context.Context, Campaign *entity.Campaign) (*entity.Campaign, error)
-	FindCampaignsByIssuer(ctx context.Context, issuer Address) ([]*entity.Campaign, error)
+	FindCampaignsByDebtor(ctx context.Context, debtor Address) ([]*entity.Campaign, error)
 	FindCampaignsByInvestor(ctx context.Context, investor Address) ([]*entity.Campaign, error)
 	FindCampaignById(ctx context.Context, id uint) (*entity.Campaign, error)
 	FindAllCampaigns(ctx context.Context) ([]*entity.Campaign, error)

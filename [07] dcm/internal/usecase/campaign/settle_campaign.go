@@ -18,7 +18,7 @@ type SettleCampaignInputDTO struct {
 type SettleCampaignOutputDTO struct {
 	Id                uint            `json:"id"`
 	Token             Address         `json:"token"`
-	Issuer            Address         `json:"issuer"`
+	Debtor            Address         `json:"debtor"`
 	CollateralAddress Address         `json:"collateral_address"`
 	CollateralAmount  *uint256.Int    `json:"collateral_amount"`
 	DebtIssued        *uint256.Int    `json:"debt_issued"`
@@ -92,7 +92,7 @@ func (uc *SettleCampaignUseCase) Execute(
 	return &SettleCampaignOutputDTO{
 		Id:                res.Id,
 		Token:             res.Token,
-		Issuer:            res.Issuer,
+		Debtor:            res.Debtor,
 		CollateralAddress: res.CollateralAddress,
 		CollateralAmount:  res.CollateralAmount,
 		DebtIssued:        res.DebtIssued,
@@ -129,8 +129,8 @@ func (uc *SettleCampaignUseCase) Validate(
 		return fmt.Errorf("deposit amount is lower than the total obligation")
 	}
 
-	if Campaign.Issuer != Address(deposit.Sender) {
-		return fmt.Errorf("only the campaign issuer can settle the campaign")
+	if Campaign.Debtor != Address(deposit.Sender) {
+		return fmt.Errorf("only the campaign debtor can settle the campaign")
 	}
 	return nil
 }

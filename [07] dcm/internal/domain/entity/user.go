@@ -16,7 +16,7 @@ type UserRole string
 
 const (
 	UserRoleAdmin    UserRole = "admin"
-	UserRoleIssuer   UserRole = "issuer"
+	UserRoleDebtor   UserRole = "debtor"
 	UserRoleInvestor UserRole = "investor"
 )
 
@@ -44,7 +44,7 @@ func (u *User) validate() error {
 	if u.Role == "" {
 		return fmt.Errorf("%w: role cannot be empty", ErrInvalidUser)
 	}
-	if u.Role != UserRoleAdmin && u.Role != UserRoleIssuer && u.Role != UserRoleInvestor {
+	if u.Role != UserRoleAdmin && u.Role != UserRoleDebtor && u.Role != UserRoleInvestor {
 		return fmt.Errorf("%w: invalid role", ErrInvalidUser)
 	}
 	if u.Address == (Address{}) {

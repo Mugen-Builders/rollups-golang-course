@@ -51,13 +51,13 @@ func (r *SQLiteRepository) FindCampaignsByInvestor(ctx context.Context, investor
 	return Campaigns, nil
 }
 
-func (r *SQLiteRepository) FindCampaignsByIssuer(ctx context.Context, issuer Address) ([]*entity.Campaign, error) {
+func (r *SQLiteRepository) FindCampaignsByDebtor(ctx context.Context, debtor Address) ([]*entity.Campaign, error) {
 	var Campaigns []*entity.Campaign
 	if err := r.Db.WithContext(ctx).
-		Where("issuer = ?", issuer).
+		Where("debtor = ?", debtor).
 		Preload("Orders").
 		Find(&Campaigns).Error; err != nil {
-		return nil, fmt.Errorf("failed to find campaigns by issuer: %w", err)
+		return nil, fmt.Errorf("failed to find campaigns by debtor: %w", err)
 	}
 	return Campaigns, nil
 }

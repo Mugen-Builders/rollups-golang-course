@@ -77,6 +77,6 @@ func (f *RBACFactory) InvestorOnly() router.Middleware {
 	return f.Create([]string{"investor"})
 }
 
-func (f *RBACFactory) IssuerOnly() router.Middleware {
-	return f.Create([]string{"issuer"})
+func (f *RBACFactory) DebtorOnly() router.Middleware {
+	return f.Create([]string{"debtor"})
 }

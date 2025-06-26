@@ -26,7 +26,7 @@ const (
 type Campaign struct {
 	Id                uint          `json:"id" gorm:"primaryKey"`
 	Token             Address       `json:"token,omitempty" gorm:"custom_type:text;not null"`
-	Issuer            Address       `json:"issuer,omitempty" gorm:"custom_type:text;not null"`
+	Debtor            Address       `json:"debtor,omitempty" gorm:"custom_type:text;not null"`
 	CollateralAddress Address       `json:"collateral_address,omitempty" gorm:"custom_type:text;not null"`
 	CollateralAmount  *uint256.Int  `json:"collateral_amount,omitempty" gorm:"custom_type:text;not null"`
 	DebtIssued        *uint256.Int  `json:"debt_issued,omitempty" gorm:"custom_type:text;not null"`
@@ -41,10 +41,10 @@ type Campaign struct {
 	UpdatedAt         int64         `json:"updated_at,omitempty" gorm:"default:0"`
 }
 
-func NewCampaign(token Address, issuer Address, collateral_address Address, collateral_amount *uint256.Int, debt_issued *uint256.Int, maxInterestRate *uint256.Int, closesAt int64, maturityAt int64, createdAt int64) (*Campaign, error) {
+func NewCampaign(token Address, debtor Address, collateral_address Address, collateral_amount *uint256.Int, debt_issued *uint256.Int, maxInterestRate *uint256.Int, closesAt int64, maturityAt int64, createdAt int64) (*Campaign, error) {
 	Campaign := &Campaign{
 		Token:             token,
-		Issuer:            issuer,
+		Debtor:            debtor,
 		CollateralAddress: collateral_address,
 		CollateralAmount:  collateral_amount,
 		DebtIssued:        debt_issued,
@@ -65,8 +65,8 @@ func (a *Campaign) validate() error {
 	if a.Token == (Address{}) {
 		return fmt.Errorf("%w: invalid token address", ErrInvalidCampaign)
 	}
-	if a.Issuer == (Address{}) {
-		return fmt.Errorf("%w: invalid issuer address", ErrInvalidCampaign)
+	if a.Debtor == (Address{}) {
+		return fmt.Errorf("%w: invalid debtor address", ErrInvalidCampaign)
 	}
 	if a.CollateralAddress == (Address{}) {
 		return fmt.Errorf("%w: invalid collateral_address address", ErrInvalidCampaign)

@@ -18,7 +18,7 @@ type ExecuteCampaignCollateralInputDTO struct {
 type ExecuteCampaignCollateralOutputDTO struct {
 	CampaignId        uint            `json:"campaign_id"`
 	Token             Address         `json:"token"`
-	Issuer            Address         `json:"issuer"`
+	Debtor            Address         `json:"debtor"`
 	CollateralAddress Address         `json:"collateral_address"`
 	CollateralAmount  *uint256.Int    `json:"collateral_amount"`
 	DebtIssued        *uint256.Int    `json:"debt_issued"`
@@ -79,7 +79,7 @@ func (uc *ExecuteCampaignCollateralUseCase) Execute(ctx context.Context, input *
 	return &ExecuteCampaignCollateralOutputDTO{
 		CampaignId:        res.Id,
 		Token:             res.Token,
-		Issuer:            res.Issuer,
+		Debtor:            res.Debtor,
 		CollateralAddress: res.CollateralAddress,
 		CollateralAmount:  res.CollateralAmount,
 		DebtIssued:        res.DebtIssued,

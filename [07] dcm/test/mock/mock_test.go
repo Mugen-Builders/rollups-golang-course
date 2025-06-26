@@ -41,7 +41,7 @@ func (s *DCMSystemSuite) SetupTest() {
 
 func (s *DCMSystemSuite) TestCreateCampaign() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -49,27 +49,27 @@ func (s *DCMSystemSuite) TestCreateCampaign() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 }
 
 func (s *DCMSystemSuite) TestCloseCampaign() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
 	anyone := common.HexToAddress("0x0000000000000000000000000000000000000001")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -83,12 +83,12 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create investors users
@@ -128,11 +128,11 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
 	createOrderInput := []byte(`{"path": "order/create", "data": {"campaign_id":1,"interest_rate":"9"}}`)
@@ -157,11 +157,11 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 
 	time.Sleep(5 * time.Second)
 
-	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"issuer":"%s"}}`, issuer))
+	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"debtor":"%s"}}`, debtor))
 	closeCampaignOutput := s.Tester.Advance(anyone, closeCampaignInput)
 	s.Len(closeCampaignOutput.Notices, 1)
 
-	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
+	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"partially_accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"accepted","created_at":%d,"updated_at":%d},`+
@@ -170,7 +170,7 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, closesAt, // Order 1
 		investor02.Hex(), baseTime, closesAt, // Order 2
@@ -188,7 +188,7 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 	// investor03: deposited 2000, fully accepted 2000
 	// investor04: deposited 5000, fully accepted 5000
 	// investor05: deposited 5500, fully accepted 5500
-	// issuer: deposited 10000 collateral, received 100000 from investors
+	// debtor: deposited 10000 collateral, received 100000 from investors
 
 	// Verify investor01 balance (60000 - 59500 = 500 rejected should be returned)
 	erc20BalanceInput := []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, investor01.Hex(), token.Hex()))
@@ -220,8 +220,8 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 	s.Len(erc20BalanceOutput.Reports, 1)
 	s.Equal(`"0"`, string(erc20BalanceOutput.Reports[0].Payload))
 
-	// Verify issuer balance (should have received 100000 from investors)
-	erc20BalanceInput = []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, issuer.Hex(), token.Hex()))
+	// Verify debtor balance (should have received 100000 from investors)
+	erc20BalanceInput = []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, debtor.Hex(), token.Hex()))
 	erc20BalanceOutput = s.Tester.Inspect(erc20BalanceInput)
 	s.Len(erc20BalanceOutput.Reports, 1)
 	s.Equal(`"100000"`, string(erc20BalanceOutput.Reports[0].Payload))
@@ -230,7 +230,7 @@ func (s *DCMSystemSuite) TestCloseCampaign() {
 func (s *DCMSystemSuite) TestSettleCampaign() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
 	anyone := common.HexToAddress("0x0000000000000000000000000000000000000001")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -244,12 +244,12 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create investors users
@@ -289,11 +289,11 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
 	createOrderInput := []byte(`{"path": "order/create", "data": {"campaign_id":1,"interest_rate":"9"}}`)
@@ -318,11 +318,11 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 
 	time.Sleep(5 * time.Second)
 
-	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"issuer":"%s"}}`, issuer))
+	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"debtor":"%s"}}`, debtor))
 	closeCampaignOutput := s.Tester.Advance(anyone, closeCampaignInput)
 	s.Len(closeCampaignOutput.Notices, 1)
 
-	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
+	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"partially_accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"accepted","created_at":%d,"updated_at":%d},`+
@@ -331,7 +331,7 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, closesAt, // Order 1
 		investor02.Hex(), baseTime, closesAt, // Order 2
@@ -345,21 +345,21 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 
 	// Withdraw raised amount
 	withdrawRaisedAmountInput := []byte(fmt.Sprintf(`{"path":"user/erc20-withdraw","data":{"token":"%s","amount":"100000"}}`, token.Hex()))
-	withdrawRaisedAmountOutput := s.Tester.Advance(issuer, withdrawRaisedAmountInput)
+	withdrawRaisedAmountOutput := s.Tester.Advance(debtor, withdrawRaisedAmountInput)
 	s.Len(withdrawRaisedAmountOutput.Notices, 1)
 
-	expectedWithdrawRaisedAmountOutput := fmt.Sprintf(`ERC20 withdrawn - token: %s, amount: 100000, user: %s`, token.Hex(), issuer.Hex())
+	expectedWithdrawRaisedAmountOutput := fmt.Sprintf(`ERC20 withdrawn - token: %s, amount: 100000, user: %s`, token.Hex(), debtor.Hex())
 	s.Equal(expectedWithdrawRaisedAmountOutput, string(withdrawRaisedAmountOutput.Notices[0].Payload))
 
 	time.Sleep(5 * time.Second)
 
-	settleCampaignInput := []byte(`{"path":"campaign/issuer/settle", "data":{"campaign_id":1}}`)
-	settleCampaignOutput := s.Tester.DepositERC20(token, issuer, big.NewInt(108195), settleCampaignInput)
+	settleCampaignInput := []byte(`{"path":"campaign/debtor/settle", "data":{"campaign_id":1}}`)
+	settleCampaignOutput := s.Tester.DepositERC20(token, debtor, big.NewInt(108195), settleCampaignInput)
 	s.Len(settleCampaignOutput.Notices, 1)
 
 	settledAt := baseTime + 10 // baseTime
 
-	expectedSettleCampaignOutput := fmt.Sprintf(`campaign settled - {"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"settled","orders":[`+
+	expectedSettleCampaignOutput := fmt.Sprintf(`campaign settled - {"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"settled","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"settled","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"settled","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"settled","created_at":%d,"updated_at":%d},`+
@@ -368,7 +368,7 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, settledAt, // Order 1
 		investor02.Hex(), baseTime, settledAt, // Order 2
@@ -386,7 +386,7 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 	// investor03: should receive 2000 + (2000 * 4% = 80) = 2080
 	// investor04: should receive 5000 + (5000 * 6% = 300) = 5300
 	// investor05: should receive 5500 + (5500 * 4% = 220) = 5720
-	// issuer: paid 108195 to settle the campaign
+	// debtor: paid 108195 to settle the campaign
 
 	// Verify investor01 balance (received 64855 + rejected order amount = 65355)
 	erc20BalanceInput := []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, investor01.Hex(), token.Hex()))
@@ -418,8 +418,8 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 	s.Len(erc20BalanceOutput.Reports, 1)
 	s.Equal(`"5720"`, string(erc20BalanceOutput.Reports[0].Payload))
 
-	// Verify issuer balance (had 100000, paid 108195, so should be -8195)
-	erc20BalanceInput = []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, issuer.Hex(), token.Hex()))
+	// Verify debtor balance (had 100000, paid 108195, so should be -8195)
+	erc20BalanceInput = []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, debtor.Hex(), token.Hex()))
 	erc20BalanceOutput = s.Tester.Inspect(erc20BalanceInput)
 	s.Len(erc20BalanceOutput.Reports, 1)
 	s.Equal(`"0"`, string(erc20BalanceOutput.Reports[0].Payload))
@@ -428,7 +428,7 @@ func (s *DCMSystemSuite) TestSettleCampaign() {
 func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
 	anyone := common.HexToAddress("0x0000000000000000000000000000000000000001")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -442,12 +442,12 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create investors users
@@ -487,11 +487,11 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
 	createOrderInput := []byte(`{"path": "order/create", "data": {"campaign_id":1,"interest_rate":"9"}}`)
@@ -516,11 +516,11 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 
 	time.Sleep(5 * time.Second)
 
-	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"issuer":"%s"}}`, issuer))
+	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"debtor":"%s"}}`, debtor))
 	closeCampaignOutput := s.Tester.Advance(anyone, closeCampaignInput)
 	s.Len(closeCampaignOutput.Notices, 1)
 
-	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
+	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"partially_accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"accepted","created_at":%d,"updated_at":%d},`+
@@ -529,7 +529,7 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, closesAt, // Order 1
 		investor02.Hex(), baseTime, closesAt, // Order 2
@@ -543,10 +543,10 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 
 	// Withdraw raised amount
 	withdrawRaisedAmountInput := []byte(fmt.Sprintf(`{"path":"user/erc20-withdraw","data":{"token":"%s","amount":"100000"}}`, token.Hex()))
-	withdrawRaisedAmountOutput := s.Tester.Advance(issuer, withdrawRaisedAmountInput)
+	withdrawRaisedAmountOutput := s.Tester.Advance(debtor, withdrawRaisedAmountInput)
 	s.Len(withdrawRaisedAmountOutput.Notices, 1)
 
-	expectedWithdrawRaisedAmountOutput := fmt.Sprintf(`ERC20 withdrawn - token: %s, amount: 100000, user: %s`, token.Hex(), issuer.Hex())
+	expectedWithdrawRaisedAmountOutput := fmt.Sprintf(`ERC20 withdrawn - token: %s, amount: 100000, user: %s`, token.Hex(), debtor.Hex())
 	s.Equal(expectedWithdrawRaisedAmountOutput, string(withdrawRaisedAmountOutput.Notices[0].Payload))
 
 	findCampaignByIdInput := []byte(fmt.Sprintf(`{"path":"campaign/id", "data":{"id":1}}`))
@@ -554,7 +554,7 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 	findCampaignByIdOutput := s.Tester.Inspect(findCampaignByIdInput)
 	s.Len(findCampaignByIdOutput.Reports, 1)
 
-	expectedFindCampaignByIssuerOutput := fmt.Sprintf(`[{"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
+	expectedFindCampaignByDebtorOutput := fmt.Sprintf(`[{"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"partially_accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"accepted","created_at":%d,"updated_at":%d},`+
@@ -563,7 +563,7 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}]`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, closesAt, // Order 1
 		investor02.Hex(), baseTime, closesAt, // Order 2
@@ -574,21 +574,21 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 		baseTime, closesAt, maturityAt, closesAt,
 	)
 
-	findCampaignsByIssuerInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer", "data":{"issuer":"%s"}}`, issuer))
+	findCampaignsByDebtorInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor", "data":{"debtor":"%s"}}`, debtor))
 
-	findCampaignsByIssuerOutput := s.Tester.Inspect(findCampaignsByIssuerInput)
-	s.Len(findCampaignsByIssuerOutput.Reports, 1)
-	s.Equal(expectedFindCampaignByIssuerOutput, string(findCampaignsByIssuerOutput.Reports[0].Payload))
+	findCampaignsByDebtorOutput := s.Tester.Inspect(findCampaignsByDebtorInput)
+	s.Len(findCampaignsByDebtorOutput.Reports, 1)
+	s.Equal(expectedFindCampaignByDebtorOutput, string(findCampaignsByDebtorOutput.Reports[0].Payload))
 
 	time.Sleep(6 * time.Second)
 
 	executeCampaignCollateralInput := []byte(fmt.Sprintf(`{"path":"campaign/execute-collateral", "data":{"campaign_id":1}}`))
-	executeCampaignCollateralOutput := s.Tester.Advance(issuer, executeCampaignCollateralInput)
+	executeCampaignCollateralOutput := s.Tester.Advance(debtor, executeCampaignCollateralInput)
 	s.Len(executeCampaignCollateralOutput.Notices, 1)
 
 	collateralExecutedAt := baseTime + 11 // baseTime
 
-	expectedExecuteCampaignCollateralOutput := fmt.Sprintf(`campaign collateral executed - {"campaign_id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"collateral_executed","orders":[`+
+	expectedExecuteCampaignCollateralOutput := fmt.Sprintf(`campaign collateral executed - {"campaign_id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"collateral_executed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"settled_by_collateral","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"settled_by_collateral","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"settled_by_collateral","created_at":%d,"updated_at":%d},`+
@@ -597,7 +597,7 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, collateralExecutedAt, // Order 1
 		investor02.Hex(), baseTime, collateralExecutedAt, // Order 2
@@ -621,7 +621,7 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 	// Remaining: 10000 - 9997 = 3 tokens remain in the application (not distributed)
 	// Final distribution:
 	// investor01: 5994, investor02: 2794, investor03: 192, investor04: 489, investor05: 528
-	// issuer: no additional deposit, just execution of existing collateral
+	// debtor: no additional deposit, just execution of existing collateral
 
 	// Verify investor01 balance (received 5994 collateral)
 	erc20BalanceInput := []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, investor01.Hex(), collateral.Hex()))
@@ -653,8 +653,8 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 	s.Len(erc20BalanceOutput.Reports, 1)
 	s.Equal(`"528"`, string(erc20BalanceOutput.Reports[0].Payload))
 
-	// Verify issuer balance (no additional deposit, just execution of existing collateral)
-	erc20BalanceInput = []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, issuer.Hex(), collateral.Hex()))
+	// Verify debtor balance (no additional deposit, just execution of existing collateral)
+	erc20BalanceInput = []byte(fmt.Sprintf(`{"path":"user/erc20-balance","data":{"address":"%s","token":"%s"}}`, debtor.Hex(), collateral.Hex()))
 	erc20BalanceOutput = s.Tester.Inspect(erc20BalanceInput)
 	s.Len(erc20BalanceOutput.Reports, 1)
 	s.Equal(`"0"`, string(erc20BalanceOutput.Reports[0].Payload))
@@ -662,7 +662,7 @@ func (s *DCMSystemSuite) TestExecuteCampaignCollateral() {
 
 func (s *DCMSystemSuite) TestFindAllCampaigns() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -670,20 +670,20 @@ func (s *DCMSystemSuite) TestFindAllCampaigns() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
 	findAllCampaignsInput := []byte(`{"path":"campaign"}`)
@@ -691,13 +691,13 @@ func (s *DCMSystemSuite) TestFindAllCampaigns() {
 	findAllCampaignsOutput := s.Tester.Inspect(findAllCampaignsInput)
 	s.Len(findAllCampaignsOutput.Reports, 1)
 
-	expectedFindAllCampaignsOutput := fmt.Sprintf(`[{"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"0","total_raised":"0","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":0}]`, baseTime, closesAt, maturityAt)
+	expectedFindAllCampaignsOutput := fmt.Sprintf(`[{"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"0","total_raised":"0","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":0}]`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedFindAllCampaignsOutput, string(findAllCampaignsOutput.Reports[0].Payload))
 }
 
 func (s *DCMSystemSuite) TestFindCampaignById() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -705,20 +705,20 @@ func (s *DCMSystemSuite) TestFindCampaignById() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
 	findCampaignByIdInput := []byte(fmt.Sprintf(`{"path":"campaign/id", "data":{"id":1}}`))
@@ -726,13 +726,13 @@ func (s *DCMSystemSuite) TestFindCampaignById() {
 	findCampaignByIdOutput := s.Tester.Inspect(findCampaignByIdInput)
 	s.Len(findCampaignByIdOutput.Reports, 1)
 
-	expectedFindCampaignByIdOutput := fmt.Sprintf(`{"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"0","total_raised":"0","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":0}`, baseTime, closesAt, maturityAt)
+	expectedFindCampaignByIdOutput := fmt.Sprintf(`{"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"0","total_raised":"0","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":0}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedFindCampaignByIdOutput, string(findCampaignByIdOutput.Reports[0].Payload))
 }
 
-func (s *DCMSystemSuite) TestFindCampaignsByIssuer() {
+func (s *DCMSystemSuite) TestFindCampaignsByDebtor() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -740,35 +740,35 @@ func (s *DCMSystemSuite) TestFindCampaignsByIssuer() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
-	findCampaignsByIssuerInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer", "data":{"issuer":"%s"}}`, issuer))
+	findCampaignsByDebtorInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor", "data":{"debtor":"%s"}}`, debtor))
 
-	findCampaignsByIssuerOutput := s.Tester.Inspect(findCampaignsByIssuerInput)
-	s.Len(findCampaignsByIssuerOutput.Reports, 1)
+	findCampaignsByDebtorOutput := s.Tester.Inspect(findCampaignsByDebtorInput)
+	s.Len(findCampaignsByDebtorOutput.Reports, 1)
 
-	expectedFindCampaignsByIssuerOutput := fmt.Sprintf(`[{"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"0","total_raised":"0","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":0}]`, baseTime, closesAt, maturityAt)
-	s.Equal(expectedFindCampaignsByIssuerOutput, string(findCampaignsByIssuerOutput.Reports[0].Payload))
+	expectedFindCampaignsByDebtorOutput := fmt.Sprintf(`[{"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"0","total_raised":"0","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":0}]`, baseTime, closesAt, maturityAt)
+	s.Equal(expectedFindCampaignsByDebtorOutput, string(findCampaignsByDebtorOutput.Reports[0].Payload))
 }
 
 func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 	admin := common.HexToAddress("0x976EA74026E726554dB657fA54763abd0C3a0aa9")
 	anyone := common.HexToAddress("0x0000000000000000000000000000000000000001")
-	issuer := common.HexToAddress("0x0000000000000000000000000000000000000007")
+	debtor := common.HexToAddress("0x0000000000000000000000000000000000000007")
 	collateral := common.HexToAddress("0x0000000000000000000000000000000000000008")
 	token := common.HexToAddress("0x0000000000000000000000000000000000000009")
 
@@ -782,12 +782,12 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 	closesAt := baseTime + 5
 	maturityAt := baseTime + 10
 
-	// create issuer user
-	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"issuer"}}`, issuer))
+	// create debtor user
+	createUserInput := []byte(fmt.Sprintf(`{"path":"user/admin/create","data":{"address":"%s","role":"debtor"}}`, debtor))
 	createUserOutput := s.Tester.Advance(admin, createUserInput)
 	s.Len(createUserOutput.Notices, 1)
 
-	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"issuer","address":"%s","created_at":%d}`, issuer, baseTime)
+	expectedCreateUserOutput := fmt.Sprintf(`user created - {"id":2,"role":"debtor","address":"%s","created_at":%d}`, debtor, baseTime)
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create investors users
@@ -827,11 +827,11 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 	s.Equal(expectedCreateUserOutput, string(createUserOutput.Notices[0].Payload))
 
 	// create campaign
-	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
-	createCampaignOutput := s.Tester.DepositERC20(collateral, issuer, big.NewInt(10000), createCampaignInput)
+	createCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor/create","data":{"token":"%s", "max_interest_rate":"10", "debt_issued":"100000", "closes_at":%d,"maturity_at":%d}}`, token, closesAt, maturityAt))
+	createCampaignOutput := s.Tester.DepositERC20(collateral, debtor, big.NewInt(10000), createCampaignInput)
 	s.Len(createCampaignOutput.Notices, 1)
 
-	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","issuer":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
+	expectedCreateCampaignOutput := fmt.Sprintf(`campaign created - {"id":1,"token":"0x0000000000000000000000000000000000000009","debtor":"0x0000000000000000000000000000000000000007","collateral_address":"0x0000000000000000000000000000000000000008","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","state":"ongoing","orders":[],"created_at":%d,"closes_at":%d,"maturity_at":%d}`, baseTime, closesAt, maturityAt)
 	s.Equal(expectedCreateCampaignOutput, string(createCampaignOutput.Notices[0].Payload))
 
 	createOrderInput := []byte(`{"path": "order/create", "data": {"campaign_id":1,"interest_rate":"9"}}`)
@@ -856,11 +856,11 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 
 	time.Sleep(5 * time.Second)
 
-	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"issuer":"%s"}}`, issuer))
+	closeCampaignInput := []byte(fmt.Sprintf(`{"path":"campaign/close", "data":{"debtor":"%s"}}`, debtor))
 	closeCampaignOutput := s.Tester.Advance(anyone, closeCampaignInput)
 	s.Len(closeCampaignOutput.Notices, 1)
 
-	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
+	expectedCloseCampaignOutput := fmt.Sprintf(`campaign closed - {"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"partially_accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"accepted","created_at":%d,"updated_at":%d},`+
@@ -869,7 +869,7 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, closesAt, // Order 1
 		investor02.Hex(), baseTime, closesAt, // Order 2
@@ -883,13 +883,13 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 
 	// Withdraw raised amount
 	withdrawRaisedAmountInput := []byte(fmt.Sprintf(`{"path":"user/erc20-withdraw","data":{"token":"%s","amount":"100000"}}`, token.Hex()))
-	withdrawRaisedAmountOutput := s.Tester.Advance(issuer, withdrawRaisedAmountInput)
+	withdrawRaisedAmountOutput := s.Tester.Advance(debtor, withdrawRaisedAmountInput)
 	s.Len(withdrawRaisedAmountOutput.Notices, 1)
 
-	expectedWithdrawRaisedAmountOutput := fmt.Sprintf(`ERC20 withdrawn - token: %s, amount: 100000, user: %s`, token.Hex(), issuer.Hex())
+	expectedWithdrawRaisedAmountOutput := fmt.Sprintf(`ERC20 withdrawn - token: %s, amount: 100000, user: %s`, token.Hex(), debtor.Hex())
 	s.Equal(expectedWithdrawRaisedAmountOutput, string(withdrawRaisedAmountOutput.Notices[0].Payload))
 
-	expectedFindCampaignByIssuerOutput := fmt.Sprintf(`[{"id":1,"token":"%s","issuer":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
+	expectedFindCampaignByDebtorOutput := fmt.Sprintf(`[{"id":1,"token":"%s","debtor":"%s","collateral_address":"%s","collateral_amount":"10000","debt_issued":"100000","max_interest_rate":"10","total_obligation":"108195","total_raised":"100000","state":"closed","orders":[`+
 		`{"id":1,"campaign_id":1,"investor":"%s","amount":"59500","interest_rate":"9","state":"partially_accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":2,"campaign_id":1,"investor":"%s","amount":"28000","interest_rate":"8","state":"accepted","created_at":%d,"updated_at":%d},`+
 		`{"id":3,"campaign_id":1,"investor":"%s","amount":"2000","interest_rate":"4","state":"accepted","created_at":%d,"updated_at":%d},`+
@@ -898,7 +898,7 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 		`{"id":6,"campaign_id":1,"investor":"%s","amount":"500","interest_rate":"9","state":"rejected","created_at":%d,"updated_at":%d}],`+
 		`"created_at":%d,"closes_at":%d,"maturity_at":%d,"updated_at":%d}]`,
 		token.Hex(),
-		issuer.Hex(),
+		debtor.Hex(),
 		collateral.Hex(),
 		investor01.Hex(), baseTime, closesAt, // Order 1
 		investor02.Hex(), baseTime, closesAt, // Order 2
@@ -909,11 +909,11 @@ func (s *DCMSystemSuite) TestFindCampaignsByInvestor() {
 		baseTime, closesAt, maturityAt, closesAt,
 	)
 
-	findCampaignsByIssuerInput := []byte(fmt.Sprintf(`{"path":"campaign/issuer", "data":{"issuer":"%s"}}`, issuer))
+	findCampaignsByDebtorInput := []byte(fmt.Sprintf(`{"path":"campaign/debtor", "data":{"debtor":"%s"}}`, debtor))
 
-	findCampaignsByIssuerOutput := s.Tester.Inspect(findCampaignsByIssuerInput)
-	s.Len(findCampaignsByIssuerOutput.Reports, 1)
-	s.Equal(expectedFindCampaignByIssuerOutput, string(findCampaignsByIssuerOutput.Reports[0].Payload))
+	findCampaignsByDebtorOutput := s.Tester.Inspect(findCampaignsByDebtorInput)
+	s.Len(findCampaignsByDebtorOutput.Reports, 1)
+	s.Equal(expectedFindCampaignByDebtorOutput, string(findCampaignsByDebtorOutput.Reports[0].Payload))
 }
 
 func (s *DCMSystemSuite) TestEmergencyERC20Withdraw() {

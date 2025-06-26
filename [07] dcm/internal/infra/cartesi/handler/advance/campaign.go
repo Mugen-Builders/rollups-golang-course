@@ -107,7 +107,7 @@ func (h *CampaignAdvanceHandlers) CloseCampaign(env rollmelette.Env, metadata ro
 		}
 	}
 
-	if err := env.ERC20Transfer(token, env.AppAddress(), common.Address(res.Issuer), res.TotalRaised.ToBig()); err != nil {
+	if err := env.ERC20Transfer(token, env.AppAddress(), common.Address(res.Debtor), res.TotalRaised.ToBig()); err != nil {
 		return fmt.Errorf("failed to transfer total raised: %w", err)
 	}
 
@@ -143,7 +143,7 @@ func (h *CampaignAdvanceHandlers) SettleCampaign(env rollmelette.Env, metadata r
 	}
 
 	contractAddr := common.Address(res.Token)
-	issuerAddr := common.Address(res.Issuer)
+	debtorAddr := common.Address(res.Debtor)
 
 	// Process settled orders
 	for _, order := range res.Orders {
@@ -157,7 +157,7 @@ func (h *CampaignAdvanceHandlers) SettleCampaign(env rollmelette.Env, metadata r
 
 			if err := env.ERC20Transfer(
 				contractAddr,
-				issuerAddr,
+				debtorAddr,
 				common.Address(order.Investor),
 				totalPayment.ToBig(),
 			); err != nil {
