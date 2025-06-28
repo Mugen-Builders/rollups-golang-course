@@ -2,7 +2,7 @@ START_LOG = @echo "======================= START OF LOG ======================="
 END_LOG = @echo "======================== END OF LOG ======================="
 
 .PHONY: build
-build: ## Build the application RISC-V image with sunodo
+build: ## Build the application RISC-V image with cartesi cli
 	$(START_LOG)
 	@cartesi build
 	$(END_LOG)
