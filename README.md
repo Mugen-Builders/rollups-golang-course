@@ -6,7 +6,7 @@
 <i>Source code of the Cartesi Rollups Golang video series</i>
 </div>
 <div align="center">
-<b>Discover a boundless design space for your most ambitious web3 projects.</b>
+<b>Any Code. Ethereum’s Security.</b>
 </div>
 <br>
 <p align="center">
