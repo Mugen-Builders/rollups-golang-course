@@ -3,7 +3,7 @@
 </div>
 <br>
 <div align="center">
-<i>Source code of the Cartesi Rollups Golang video series</i>
+<i>Source code of the Cartesi Rollups Golang course</i>
 </div>
 <div align="center">
 <b>Any Code. Ethereum’s Security.</b>
