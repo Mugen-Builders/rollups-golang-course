@@ -3,7 +3,7 @@
 </div>
 <br>
 <div align="center">
-<i>Source code of the Golang Cartesi video series</i>
+<i>Source code of the Cartesi Rollups Golang video series</i>
 </div>
 <div align="center">
 <b>Discover a boundless design space for your most ambitious web3 projects.</b>
