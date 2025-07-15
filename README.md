@@ -3,7 +3,7 @@
 </div>
 <br>
 <div align="center">
-<i>Source code for learning how to use Golang to develop web3 applications w/ Cartesi</i>
+<i>Source code of the Golang Cartesi video series</i>
 </div>
 <div align="center">
 <b>Discover a boundless design space for your most ambitious web3 projects.</b>
