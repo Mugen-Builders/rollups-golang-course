@@ -15,17 +15,19 @@ jobs:
     strategy:
       matrix:
         project: [
-          "[01] to-upper",
-          "[02] to-do",
-          "[03] high-level-framework",
-          "[04] asset-handling",
-          "[05] interacting-with-the-base-layer",
-          "[06] delegate-call-voucher",
-          "[07] dcm",
+          "src/01",
+          "src/02", 
+          "src/03",
+          "src/04",
+          "src/05",
+          "src/06",
+          "src/tribes"
         ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -51,6 +53,6 @@ jobs:
         working-directory: ${{ matrix.project }}
       
       - name: Test ${{ matrix.project }}
-        if: ${{ matrix.project != '[01] to-upper' }}
+        if: ${{ matrix.project != 'src/01' }}
         run: make test
         working-directory: ${{ matrix.project }}
