@@ -4,12 +4,10 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"time"
 
-	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/advance"
-	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/cartesi/handler/inspect"
-	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository"
 	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/repository/factory"
-	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/pkg/router"
+	"github.com/henriquemarlon/cartesi-golang-series/high-level-framework/internal/infra/rollup"
 	"github.com/rollmelette/rollmelette"
 	"github.com/spf13/cobra"
 )
@@ -28,81 +26,28 @@ var (
 	}
 )
 
-func init() {
-	Cmd.PersistentFlags().BoolVar(
-		&useMemoryDB,
-		"memory-db",
-		false,
-		"Use in-memory SQLite database instead of persistent",
-	)
-}
-
 func run(cmd *cobra.Command, args []string) {
-	ctx := context.Background()
-	repo, err := factory.NewRepositoryFromConnectionString(
-		map[bool]string{
-			true:  "sqlite://:memory:",
-			false: "sqlite:///mnt/data/voting.db",
-		}[useMemoryDB],
-	)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	repo, err := factory.NewRepositoryFromConnectionString(ctx, "sqlite:///mnt/data/voting.db")
 	if err != nil {
-		slog.Error("Failed to setup database", "error", err, "type", map[bool]string{true: "in-memory", false: "persistent"}[useMemoryDB])
+		slog.Error("Failed to initialize database", "error", err)
 		os.Exit(1)
 	}
-	slog.Info("Database initialized", "type", map[bool]string{true: "in-memory", false: "persistent"}[useMemoryDB])
+	slog.Info("Database initialized")
+	
 	defer repo.Close()
 
-	r := NewVotingSystem(repo)
+	createInfo := &rollup.CreateInfo{
+		Repo: repo,
+	}
+
+	r := rollup.Create(createInfo)
 	opts := rollmelette.NewRunOpts()
 	if err := rollmelette.Run(ctx, opts, r); err != nil {
 		slog.Error("Failed to run rollmelette", "error", err)
 		os.Exit(1)
 	}
-}
-
-func NewVotingSystem(repo repository.Repository) *router.Router {
-	votingAdvanceHandlers := advance.NewVotingAdvanceHandlers(repo)
-	votingInspectHandlers := inspect.NewVotingInspectHandlers(repo, repo)
-
-	voterAdvanceHandlers := advance.NewVoterAdvanceHandlers(repo)
-	voterInspectHandlers := inspect.NewVoterInspectHandlers(repo)
-
-	votingOptionAdvanceHandlers := advance.NewVotingOptionAdvanceHandlers(repo, repo)
-	votingOptionInspectHandlers := inspect.NewVotingOptionInspectHandlers(repo)
-
-	r := router.NewRouter()
-	r.Use(router.LoggingMiddleware)
-	r.Use(router.ErrorHandlingMiddleware)
-
-	votingGroup := r.Group("voting")
-	{
-		votingGroup.HandleAdvance("create", votingAdvanceHandlers.CreateVoting)
-		votingGroup.HandleAdvance("delete", votingAdvanceHandlers.DeleteVoting)
-		votingGroup.HandleAdvance("vote", votingAdvanceHandlers.Vote)
-		votingGroup.HandleAdvance("update-status", votingAdvanceHandlers.UpdateStatus)
-
-		votingGroup.HandleInspect("", votingInspectHandlers.FindAllVotings)
-		votingGroup.HandleInspect("id", votingInspectHandlers.FindVotingByID)
-		votingGroup.HandleInspect("active", votingInspectHandlers.FindAllActiveVotings)
-		votingGroup.HandleInspect("results", votingInspectHandlers.GetResults)
-	}
-
-	voterGroup := r.Group("voter")
-	{
-		voterGroup.HandleAdvance("create", voterAdvanceHandlers.CreateVoter)
-		voterGroup.HandleAdvance("delete", voterAdvanceHandlers.DeleteVoter)
-
-		voterGroup.HandleInspect("id", voterInspectHandlers.FindVoterByID)
-		voterGroup.HandleInspect("address", voterInspectHandlers.FindVoterByAddress)
-	}
-
-	votingOptionGroup := r.Group("voting-option")
-	{
-		votingOptionGroup.HandleAdvance("create", votingOptionAdvanceHandlers.CreateVotingOption)
-		votingOptionGroup.HandleAdvance("delete", votingOptionAdvanceHandlers.DeleteVotingOption)
-
-		votingOptionGroup.HandleInspect("id", votingOptionInspectHandlers.FindVotingOptionByID)
-		votingOptionGroup.HandleInspect("voting", votingOptionInspectHandlers.FindAllOptionsByVotingID)
-	}
-	return r
 }

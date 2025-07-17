@@ -28,7 +28,7 @@ func (g *Group) Group(prefix string) *Group {
 	}
 }
 
-func (g *Group) registerHandler(path string, wrap func(handler interface{}) interface{}, register func(fullPath string, handler interface{}), handler interface{}) {
+func (g *Group) registerHandler(path string, wrap func(handler any) any, register func(fullPath string, handler any), handler any) {
 	var fullPath string
 	if path == "" {
 		fullPath = g.prefix
@@ -47,8 +47,8 @@ func (g *Group) registerHandler(path string, wrap func(handler interface{}) inte
 func (g *Group) HandleAdvance(path string, handler AdvanceHandlerFunc) {
 	g.registerHandler(
 		path,
-		func(h interface{}) interface{} { return h.(AdvanceHandlerFunc) },
-		func(fullPath string, h interface{}) {
+		func(h any) any { return h.(AdvanceHandlerFunc) },
+		func(fullPath string, h any) {
 			g.router.HandleAdvance(fullPath, h.(AdvanceHandlerFunc))
 		},
 		handler,
@@ -58,8 +58,8 @@ func (g *Group) HandleAdvance(path string, handler AdvanceHandlerFunc) {
 func (g *Group) HandleInspect(path string, handler InspectHandlerFunc) {
 	g.registerHandler(
 		path,
-		func(h interface{}) interface{} { return h.(InspectHandlerFunc) },
-		func(fullPath string, h interface{}) {
+		func(h any) any { return h.(InspectHandlerFunc) },
+		func(fullPath string, h any) {
 			g.router.HandleInspect(fullPath, h.(InspectHandlerFunc))
 		},
 		handler,

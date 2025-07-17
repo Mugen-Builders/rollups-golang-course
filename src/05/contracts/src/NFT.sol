@@ -2,15 +2,16 @@
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.27;
 
+import {Ownable} from "@openzeppelin-contracts-5.2.0/access/Ownable.sol";
 import {ERC721} from "@openzeppelin-contracts-5.2.0/token/ERC721/ERC721.sol";
 import {ERC721Burnable} from "@openzeppelin-contracts-5.2.0/token/ERC721/extensions/ERC721Burnable.sol";
 import {ERC721Pausable} from "@openzeppelin-contracts-5.2.0/token/ERC721/extensions/ERC721Pausable.sol";
 import {ERC721URIStorage} from "@openzeppelin-contracts-5.2.0/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract ERC721Token is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable {
+contract NFT is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownable {
     uint256 private _nextTokenId;
 
-    constructor() ERC721("MyToken", "MTK") {}
+    constructor(address initialOwner) ERC721("MyToken", "MTK") Ownable(initialOwner) {}
 
     function pause() public {
         _pause();

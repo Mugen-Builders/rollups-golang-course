@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.27;
+
+import {NFT} from "./NFT.sol";
+
+contract NFTFactory {
+    event NFTDeployed(address indexed nft, bytes32 salt);
+    event NFTAlreadyDeployed(address indexed nft, bytes32 salt);
+
+    function newNFT(address initialOwner, bytes32 salt) external returns (NFT) {
+        address predicted = computeAddress(initialOwner, salt);
+
+        if (predicted.code.length > 0) {
+            emit NFTAlreadyDeployed(predicted, salt);
+            return NFT(predicted);
+        }
+
+        NFT nft = new NFT{salt: salt}(initialOwner);
+
+        emit NFTDeployed(address(nft), salt);
+        return nft;
+    }
+
+    function computeAddress(address initialOwner, bytes32 salt) public view returns (address) {
+        return address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            bytes1(0xff),
+                            address(this),
+                            salt,
+                            keccak256(abi.encodePacked(type(NFT).creationCode, abi.encode(initialOwner)))
+                        )
+                    )
+                )
+            )
+        );
+    }
+}

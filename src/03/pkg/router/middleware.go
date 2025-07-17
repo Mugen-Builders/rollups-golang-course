@@ -8,9 +8,9 @@ import (
 	"github.com/rollmelette/rollmelette"
 )
 
-type Middleware func(interface{}) interface{}
+type Middleware func(any) any
 
-func LoggingMiddleware(handler interface{}) interface{} {
+func LoggingMiddleware(handler any) any {
 	switch h := handler.(type) {
 	case AdvanceHandlerFunc:
 		return AdvanceHandlerFunc(func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
@@ -31,7 +31,7 @@ func LoggingMiddleware(handler interface{}) interface{} {
 	}
 }
 
-func ErrorHandlingMiddleware(handler interface{}) interface{} {
+func ErrorHandlingMiddleware(handler any) any {
 	switch h := handler.(type) {
 	case AdvanceHandlerFunc:
 		return AdvanceHandlerFunc(func(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {

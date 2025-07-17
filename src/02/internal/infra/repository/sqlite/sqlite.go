@@ -46,6 +46,8 @@ func NewSQLiteRepository(ctx context.Context, conn string) (*SQLiteRepository, e
 		return nil, err
 	}
 
+	db = db.WithContext(ctx)
+
 	return &SQLiteRepository{
 		Db: db,
 	}, nil

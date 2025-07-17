@@ -62,7 +62,7 @@ type Request struct {
 func parseRequestRawPayload(payload []byte) (*Request, error) {
 	var req Request
 	if err := json.Unmarshal(payload, &req); err != nil {
-		return nil, fmt.Errorf("invalid request format: %v", err)
+		return nil, fmt.Errorf("invalid request format: %v, payload: %s", err, string(payload))
 	}
 
 	validator := validator.New()
@@ -76,7 +76,7 @@ func parseRequestRawPayload(payload []byte) (*Request, error) {
 func (r *Router) Advance(env rollmelette.Env, metadata rollmelette.Metadata, deposit rollmelette.Deposit, payload []byte) error {
 	req, err := parseRequestRawPayload(payload)
 	if err != nil {
-		return fmt.Errorf("invalid request: %w", err)
+		return err
 	}
 
 	path := strings.Trim(req.Path, "/")
@@ -91,7 +91,7 @@ func (r *Router) Advance(env rollmelette.Env, metadata rollmelette.Metadata, dep
 func (r *Router) Inspect(env rollmelette.EnvInspector, payload []byte) error {
 	req, err := parseRequestRawPayload(payload)
 	if err != nil {
-		return fmt.Errorf("invalid request: %w", err)
+		return err
 	}
 
 	path := strings.Trim(req.Path, "/")

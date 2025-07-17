@@ -2,6 +2,8 @@
 src = "src"
 out = "out"
 libs = ["lib", "dependencies"]
+fs_permissions = [{ access = "read-write", path = "../" }]
+
 
 [dependencies]
 forge-std = "1.9.7"

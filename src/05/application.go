@@ -6,15 +6,44 @@ import (
 	"fmt"
 	"log/slog"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-playground/validator/v10"
 	"github.com/rollmelette/rollmelette"
 )
 
-type Application struct{}
+var (
+	NFTFactoryAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+)
+
+type Application struct {
+	NFT common.Address
+}
+
+func (a *Application) DeployNFT(initialOwner common.Address, salt common.Hash) ([]byte, error) {
+	abiJSON := `[{
+		"type":"function",
+		"name":"newNFT",
+		"inputs":[
+			{"type":"address"},
+			{"type":"bytes32"}
+		]
+	}]`
+	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+	if err != nil {
+		return nil, err
+	}
+
+	voucher, err := abiInterface.Pack("newNFT", initialOwner, salt)
+	if err != nil {
+		return nil, err
+	}
+	return voucher, nil
+}
 
 func (a *Application) MintNFT(to common.Address, uri string) ([]byte, error) {
 	abiJSON := `[{
@@ -30,26 +59,6 @@ func (a *Application) MintNFT(to common.Address, uri string) ([]byte, error) {
 		return nil, err
 	}
 	voucher, err := abiInterface.Pack("safeMint", to, uri)
-	if err != nil {
-		return nil, err
-	}
-	return voucher, nil
-}
-
-func (a *Application) DeployContract(bytecode []byte) ([]byte, error) {
-	abiJSON := `[{
-		"type":"function",
-		"name":"deploy",
-		"inputs":[
-			{"type":"bytes"}
-		]
-	}]`
-	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-	if err != nil {
-		return nil, err
-	}
-
-	voucher, err := abiInterface.Pack("deploy", bytecode)
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +85,36 @@ func (a *Application) Advance(
 	}
 
 	switch input.Path {
+	case "deploy_nft":
+		bytecode, err := getNFTBytecode()
+		if err != nil {
+			return err
+		}
+
+		addressType, _ := abi.NewType("address", "", nil)
+		constructorArgs, err := abi.Arguments{
+			{Type: addressType},
+		}.Pack(metadata.AppContract)
+		if err != nil {
+			return fmt.Errorf("error encoding constructor args: %w", err)
+		}
+
+		a.NFT = crypto.CreateAddress2(
+			NFTFactoryAddress,
+			common.HexToHash(strconv.Itoa(metadata.Index)),
+			crypto.Keccak256(append(bytecode, constructorArgs...)),
+		)
+
+		deployNFTPayload, err := a.DeployNFT(
+			metadata.AppContract,
+			common.HexToHash(strconv.Itoa(metadata.Index)),
+		)
+		if err != nil {
+			return err
+		}
+		env.Voucher(NFTFactoryAddress, big.NewInt(0), deployNFTPayload)
 	case "mint_nft":
 		var mintNFTInput struct {
-			Token common.Address `json:"token"`
 			To    common.Address `json:"to"`
 			URI   string         `json:"uri"`
 		}
@@ -89,20 +125,7 @@ func (a *Application) Advance(
 		if err != nil {
 			return err
 		}
-		env.Voucher(mintNFTInput.Token, big.NewInt(0), voucher)
-	case "deploy_contract":
-		var deployContractInput struct {
-			Deployer common.Address `json:"deployer"`
-			Bytecode []byte         `json:"bytecode"`
-		}
-		if err := json.Unmarshal(input.Data, &deployContractInput); err != nil {
-			return err
-		}
-		voucher, err := a.DeployContract(deployContractInput.Bytecode)
-		if err != nil {
-			return err
-		}
-		env.Voucher(deployContractInput.Deployer, big.NewInt(0), voucher)
+		env.Voucher(a.NFT, big.NewInt(0), voucher)
 	default:
 		// using report to log an error
 		env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))

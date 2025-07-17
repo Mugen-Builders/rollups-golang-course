@@ -13,6 +13,10 @@ test: ## Run the application unit tests
 build: ## Build the application RISC-V image with cartesi cli
 	cartesi build
 
+.PHONY: generate
+generate: ## Generate the bytecode for the NFT contract
+	@forge script --root ./contracts ./contracts/script/GenerateBytecode.s.sol:GenerateBytecode
+
 .PHONY: run
 run: ## Run the application in the Cartesi Machine with cartesi cli
 	cartesi run
@@ -32,4 +36,9 @@ contracts: ## Deploy the asset contracts
 
 .PHONY: help
 help: ## Show help for each of the Makefile recipes
-	@grep "##" $(MAKEFILE_LIST) | grep -v grep | sed -e 's/:.*##/:\t/'
+	@echo "Available commands:"
+	@awk '/^[a-zA-Z0-9_-]+:.*##/ { \
+		split($$0, parts, "##"); \
+		split(parts[1], target, ":"); \
+		printf "  \033[36m%-30s\033[0m %s\n", target[1], parts[2] \
+	}' $(MAKEFILE_LIST)

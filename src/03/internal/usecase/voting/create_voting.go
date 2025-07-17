@@ -19,7 +19,7 @@ type CreateVotingInputDTO struct {
 type CreateVotingOutputDTO struct {
 	Id        int     `json:"id"`
 	Title     string  `json:"title"`
-	Creator   Address `json:"Creator"`
+	Creator   Address `json:"creator"`
 	Status    string  `json:"status"`
 	StartDate int64   `json:"start_date"`
 	EndDate   int64   `json:"end_date"`

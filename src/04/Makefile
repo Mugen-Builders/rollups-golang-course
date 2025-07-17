@@ -32,4 +32,9 @@ contracts: ## Deploy the asset contracts
 
 .PHONY: help
 help: ## Show help for each of the Makefile recipes
-	@grep "##" $(MAKEFILE_LIST) | grep -v grep | sed -e 's/:.*##/:\t/'
+	@echo "Available commands:"
+	@awk '/^[a-zA-Z0-9_-]+:.*##/ { \
+		split($$0, parts, "##"); \
+		split(parts[1], target, ":"); \
+		printf "  \033[36m%-30s\033[0m %s\n", target[1], parts[2] \
+	}' $(MAKEFILE_LIST)

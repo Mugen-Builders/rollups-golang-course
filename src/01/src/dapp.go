@@ -13,11 +13,10 @@ import (
 )
 
 var (
+	state string
 	infolog = log.New(os.Stderr, "[ info ]  ", log.Lshortfile)
 	errlog  = log.New(os.Stderr, "[ error ] ", log.Lshortfile)
 )
-
-var lastestState string
 
 func HandleAdvance(data *rollups.AdvanceResponse) error {
 	dataMarshal, err := json.Marshal(data)
@@ -26,13 +25,12 @@ func HandleAdvance(data *rollups.AdvanceResponse) error {
 	}
 	infolog.Println("Received advance request data", string(dataMarshal))
 
-	// To-Upper
 	decodedPayload, err := hex.DecodeString(data.Payload[2:])
 	if err != nil {
 		return fmt.Errorf("Handler: Error decoding payload: %w", err)
 	}
-	lastestState = strings.ToUpper(string(decodedPayload))
-	infolog.Println("To-Upper:", lastestState)
+	state = strings.ToUpper(string(decodedPayload))
+	infolog.Printf("%s - to upper: %s\n", decodedPayload, state)
 	return nil
 }
 
@@ -43,7 +41,7 @@ func HandleInspect(data *rollups.InspectResponse) error {
 	}
 	infolog.Println("Received inspect request data", string(dataMarshal))
 	rollups.SendReport(&rollups.ReportRequest{
-		Payload: rollups.Str2Hex(lastestState),
+		Payload: rollups.Str2Hex(state),
 	})
 	return nil
 }
@@ -54,22 +52,22 @@ func Handler(response *rollups.FinishResponse) error {
 	switch response.Type {
 	case "advance_state":
 		data := new(rollups.AdvanceResponse)
-		if err := json.Unmarshal(response.Data, data); err != nil {
+		if err = json.Unmarshal(response.Data, data); err != nil {
 			return fmt.Errorf("Handler: Error unmarshaling advance: %w", err)
 		}
-		HandleAdvance(data)
+		err = HandleAdvance(data)
 	case "inspect_state":
 		data := new(rollups.InspectResponse)
 		if err = json.Unmarshal(response.Data, data); err != nil {
 			return fmt.Errorf("Handler: Error unmarshaling inspect: %w", err)
 		}
-		HandleInspect(data)
+		err = HandleInspect(data)
 	}
 	return err
 }
 
 func main() {
-	finish := rollups.FinishRequest{"accept"}
+	finish := rollups.FinishRequest{Status: "accept"}
 
 	for {
 		infolog.Println("Sending finish")

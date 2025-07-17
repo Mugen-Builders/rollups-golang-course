@@ -15,9 +15,9 @@ import (
 )
 
 var (
+	anyone                   = common.HexToAddress("0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
 	emergencyWithdrawAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 	safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
-	anyone                   = common.HexToAddress("0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
 )
 
 type Application struct{}

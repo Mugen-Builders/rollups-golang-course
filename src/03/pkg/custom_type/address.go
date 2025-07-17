@@ -10,11 +10,7 @@ import (
 
 type Address common.Address
 
-func HexToAddress(hex string) Address {
-	return Address(common.HexToAddress(hex))
-}
-
-func (a *Address) Scan(value interface{}) error {
+func (a *Address) Scan(value any) error {
 	switch v := value.(type) {
 	case string:
 		*a = HexToAddress(v)
@@ -31,20 +27,24 @@ func (a Address) Value() (driver.Value, error) {
 	return common.Address(a).Hex(), nil
 }
 
-// MarshalJSON serializes the Address into a JSON string.
+// MarshalJSON serializes the custom_type.Address into a JSON string.
 func (a Address) MarshalJSON() ([]byte, error) {
 	return json.Marshal(common.Address(a).Hex())
 }
 
-// UnmarshalJSON deserializes a JSON string into the Address.
+// UnmarshalJSON deserializes a JSON string into the custom_type.Address.
 func (a *Address) UnmarshalJSON(data []byte) error {
 	var hex string
 	if err := json.Unmarshal(data, &hex); err != nil {
-		return fmt.Errorf("failed to unmarshal Address: %v", err)
+		return fmt.Errorf("failed to unmarshal custom_type.Address: %v", err)
 	}
 	if !common.IsHexAddress(hex) {
 		return fmt.Errorf("invalid hex address: %s", hex)
 	}
 	*a = HexToAddress(hex)
 	return nil
+}
+
+func HexToAddress(hex string) Address {
+	return Address(common.HexToAddress(hex))
 }

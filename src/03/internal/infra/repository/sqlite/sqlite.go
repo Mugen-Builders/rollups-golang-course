@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -26,7 +27,7 @@ func (r *SQLiteRepository) Close() error {
 	return sqlDB.Close()
 }
 
-func NewSQLiteRepository(conn string) (*SQLiteRepository, error) {
+func NewSQLiteRepository(ctx context.Context, conn string) (*SQLiteRepository, error) {
 	dbPath := strings.TrimPrefix(conn, "sqlite://")
 
 	newLogger := logger.New(
@@ -45,6 +46,8 @@ func NewSQLiteRepository(conn string) (*SQLiteRepository, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db = db.WithContext(ctx)
 
 	err = db.AutoMigrate(
 		&domain.Voting{},
