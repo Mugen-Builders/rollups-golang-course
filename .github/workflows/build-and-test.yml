@@ -1,30 +1,38 @@
-name: Build
+name: build-and-test
+
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "*"
   pull_request:
+    branches: [main]
+  workflow_dispatch:
+
 permissions:
   contents: read
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: build-and-test
+  build-and-test:
+    name: Build and Test Matrix
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        project: [
-          "src/01",
-          "src/02", 
-          "src/03",
-          "src/04",
-          "src/05",
-          "src/06",
-          "src/tribes"
-        ]
+        project:
+          - src/01
+          - src/02
+          - src/03
+          - src/04
+          - src/05
+          - src/06
+          - src/tribes
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -32,30 +40,32 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23.0'
+          go-version: stable
+          cache: true
 
-      - name: Install Foundry
+      - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: current
+          cache: npm
 
       - name: Install Cartesi CLI
         run: npm install -g @cartesi/cli@2.0.0-alpha.15
 
-      - name: Set up QEMU
+      - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Check system requirements
+      - name: Verify Cartesi CLI system requirements
         run: cartesi doctor
 
-      - name: Build ${{ matrix.project }}
+      - name: Build Project
         run: make build
         working-directory: ${{ matrix.project }}
-      
-      - name: Test ${{ matrix.project }}
+
+      - name: Run Tests
         if: ${{ matrix.project != 'src/01' }}
         run: make test
         working-directory: ${{ matrix.project }}
