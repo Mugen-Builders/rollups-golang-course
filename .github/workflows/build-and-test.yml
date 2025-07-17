@@ -61,6 +61,10 @@ jobs:
       - name: Verify Cartesi CLI system requirements
         run: cartesi doctor
 
+      - name: Format Code
+        run: make fmt
+        working-directory: ${{ matrix.project }}
+
       - name: Build Project
         run: make build
         working-directory: ${{ matrix.project }}
