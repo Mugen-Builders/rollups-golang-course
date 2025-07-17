@@ -1,0 +1,3 @@
+[submodule "src/tribes"]
+	path = src/tribes
+	url = https://github.com/tribeshq/tribes.git
