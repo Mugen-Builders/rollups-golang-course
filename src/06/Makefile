@@ -14,6 +14,11 @@ build: ## Build the application RISC-V image with cartesi cli
 run: ## Run the application in the Cartesi Machine with cartesi cli
 	cartesi run
 
+.PHONY: generate
+generate: ## Generate the bytecode for the NFT
+	@forge clean --root ./contracts
+	@forge script --root ./contracts ./contracts/script/GenerateBytecode.s.sol:GenerateBytecode
+
 .PHONY: fmt
 fmt: ## Format all code (Contracts + Backend)
 	$(START_LOG)
