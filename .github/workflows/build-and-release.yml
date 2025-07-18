@@ -37,6 +37,10 @@ jobs:
       - name: Setup Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
+      - name: Install dependencies
+        run: forge soldeer install
+        working-directory: ./src/tribes/contracts
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:

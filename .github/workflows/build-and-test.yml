@@ -43,7 +43,14 @@ jobs:
           go-version: stable
 
       - name: Setup Foundry
+        if: ${{ matrix.project == 'src/05' || matrix.project == 'src/06' || matrix.project == 'src/tribes' }}
         uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install dependencies
+        if: ${{ matrix.project == 'src/05' || matrix.project == 'src/06' || matrix.project == 'src/tribes' }}
+        run: forge soldeer install
+        working-directory: ${{ matrix.project }}/contracts
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
