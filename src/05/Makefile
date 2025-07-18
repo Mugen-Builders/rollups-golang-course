@@ -10,10 +10,6 @@ test: ## Run the application unit tests
 build: ## Build the application RISC-V image with cartesi cli
 	cartesi build
 
-.PHONY: generate
-generate: ## Generate the bytecode for the NFT contract
-	@forge script --root ./contracts ./contracts/script/GenerateBytecode.s.sol:GenerateBytecode
-
 .PHONY: run
 run: ## Run the application in the Cartesi Machine with cartesi cli
 	cartesi run

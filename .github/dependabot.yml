@@ -2,13 +2,12 @@ version: 2
 updates:
   - package-ecosystem: "docker"
     directories:
-      - "[01] to-upper"
-      - "[02] to-do"
-      - "[03] high-level-framework"
-      - "[04] asset-handling"
-      - "[05] interacting-with-the-base-layer"
-      - "[06] delegate-call-voucher"
-      - "[07] dcm"
+      - "src/01"
+      - "src/02"
+      - "src/03"
+      - "src/04"
+      - "src/05"
+      - "src/06"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
