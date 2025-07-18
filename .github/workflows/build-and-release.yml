@@ -43,7 +43,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: current
-          cache: npm
 
       - name: Install Cartesi CLI
         run: npm install -g @cartesi/cli@2.0.0-alpha.15
