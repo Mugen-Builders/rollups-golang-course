@@ -14,10 +14,9 @@ run: ## Run the application in the Cartesi Machine with cartesi cli
 	cartesi run
 
 .PHONY: fmt
-fmt: ## Format all code (Contracts + Backend)
+fmt: ## Format all code
 	$(START_LOG)
 	@gofmt -w .
-	@forge fmt --root ./contracts
 	@echo "Formatting completed"
 	$(END_LOG)
 
