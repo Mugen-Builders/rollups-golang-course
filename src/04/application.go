@@ -47,6 +47,8 @@ func (a *Application) Advance(
 			d.Sender.Hex(),
 			env.EtherBalanceOf(d.Sender),
 		)))
+		return nil
+
 	case *rollmelette.ERC20Deposit:
 		env.Notice([]byte(fmt.Sprintf(
 			"1 - ERC20 balance of %s: %d before transfer to %s",
@@ -76,10 +78,12 @@ func (a *Application) Advance(
 			d.Sender.Hex(),
 			env.ERC20BalanceOf(d.Token, d.Sender),
 		)))
+		return nil
+
 	default:
 		env.Report([]byte(fmt.Sprintf("Unknown deposit type: %T", d)))
+		return fmt.Errorf("unknown deposit type: %T", d)
 	}
-	return nil
 }
 
 func (a *Application) Inspect(env rollmelette.EnvInspector, payload []byte) error {

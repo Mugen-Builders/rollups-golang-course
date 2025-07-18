@@ -1,8 +1,9 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -12,35 +13,86 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-func TestDelegateCallVoucherExample(t *testing.T) {
-	suite.Run(t, new(DelegateCallVoucherExample))
+func TestDelegateCallVoucher(t *testing.T) {
+	suite.Run(t, new(DelegateCallVoucher))
 }
 
-type DelegateCallVoucherExample struct {
+type DelegateCallVoucher struct {
 	suite.Suite
 	tester *rollmelette.Tester
 }
 
-func (s *DelegateCallVoucherExample) SetupTest() {
+func (s *DelegateCallVoucher) SetupTest() {
 	app := new(Application)
 	s.tester = rollmelette.NewTester(app)
 }
 
-func (s *DelegateCallVoucherExample) TestDelegateCallVoucherSafeTransfer() {
-	token := common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
-	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
-	amount := big.NewInt(10000)
+func (s *DelegateCallVoucher) TestVoucherDeployNFT() {
+	application := common.HexToAddress("0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e")
 
-	input := map[string]interface{}{
-		"path": "safe_transfer",
-	}
-	payload, err := json.Marshal(input)
+	deployNFTInput := []byte(`{"path":"deploy_nft","data":{"name":"MyToken","symbol":"MTK"}}`)
+	deployNFTOutput := s.tester.Advance(common.HexToAddress("0x0000000000000000000000000000000000000000"), deployNFTInput)
+	s.Nil(deployNFTOutput.Err)
+	s.Len(deployNFTOutput.Vouchers, 1)
+	s.Equal(nftFactoryAddress, deployNFTOutput.Vouchers[0].Destination)
+
+	abiJSON := `[{
+		"type":"function",
+		"name":"newNFT",
+		"inputs":[
+			{"type":"address"},
+			{"type":"bytes32"}
+		]
+	}]`
+	newNFTABI, err := abi.JSON(strings.NewReader(abiJSON))
 	s.Require().NoError(err)
 
-	result := s.tester.DepositERC20(token, to, amount, payload)
-	s.Nil(result.Err)
-	s.Len(result.DelegateCallVouchers, 2)
-	s.Equal(safeERC20TransferAddress, result.DelegateCallVouchers[0].Destination)
+	unpacked, err := newNFTABI.Methods["newNFT"].Inputs.Unpack(deployNFTOutput.Vouchers[0].Payload[4:])
+	s.Require().NoError(err)
+	s.Equal(application, unpacked[0].(common.Address))
+	saltBytes := unpacked[1].([32]byte)
+	s.Equal(common.HexToHash(strconv.Itoa(0)), common.BytesToHash(saltBytes[:]))
+}
+
+func (s *DelegateCallVoucher) TestDelegateCallVoucherMintNFT() {
+	to := common.HexToAddress("0x0000000000000000000000000000000000000001")
+	uri := "https://example.com/token/1"
+
+	mintNFTInput := []byte(fmt.Sprintf(`{"path":"mint_nft","data":{"to":"%s","uri":"%s"}}`, to, uri))
+	mintNFTOutput := s.tester.Advance(to, mintNFTInput)
+	s.Nil(mintNFTOutput.Err)
+	s.Len(mintNFTOutput.DelegateCallVouchers, 1)
+	s.Equal(safeERC721MintAddress, mintNFTOutput.DelegateCallVouchers[0].Destination)
+
+	abiJSON := `[{
+		"type":"function",
+		"name":"safeMint",
+		"inputs":[
+			{"type":"address"},
+			{"type":"address"},
+			{"type":"string"}
+		]
+	}]`
+	safeMintABI, err := abi.JSON(strings.NewReader(abiJSON))
+	s.Require().NoError(err)
+
+	unpacked, err := safeMintABI.Methods["safeMint"].Inputs.Unpack(mintNFTOutput.DelegateCallVouchers[0].Payload[4:])
+	s.Require().NoError(err)
+	s.Equal(nftAddress, unpacked[0].(common.Address))
+	s.Equal(to, unpacked[1].(common.Address))
+	s.Equal(uri, unpacked[2].(string))
+}
+
+func (s *DelegateCallVoucher) TestDelegateCallVoucherSafeTransfer() {
+	amount := big.NewInt(10000)
+	to := common.HexToAddress("0x0000000000000000000000000000000000000001")
+	token := common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
+
+	safeTransferInput := []byte(fmt.Sprintf(`{"path":"safe_transfer","data":{"token":"%s","to":"%s","amount":"%s"}}`, token, to, amount))
+	safeTransferOutput := s.tester.Advance(to, safeTransferInput)
+	s.Nil(safeTransferOutput.Err)
+	s.Len(safeTransferOutput.DelegateCallVouchers, 1)
+	s.Equal(safeERC20TransferAddress, safeTransferOutput.DelegateCallVouchers[0].Destination)
 
 	abiJSON := `[{
 		"type":"function",
@@ -50,8 +102,29 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherSafeTransfer() {
 			{"type":"address"},
 			{"type":"uint256"}
 		]
-	},
-	{
+	}]`
+	safeTransferABI, err := abi.JSON(strings.NewReader(abiJSON))
+	s.Require().NoError(err)
+
+	unpacked, err := safeTransferABI.Methods["safeTransfer"].Inputs.Unpack(safeTransferOutput.DelegateCallVouchers[0].Payload[4:])
+	s.Require().NoError(err)
+	s.Equal(token, unpacked[0].(common.Address))
+	s.Equal(to, unpacked[1].(common.Address))
+	s.Equal(amount, unpacked[2].(*big.Int))
+}
+
+func (s *DelegateCallVoucher) TestDelegateCallVoucherSafeTransferTargeted() {
+	amount := big.NewInt(10000)
+	to := common.HexToAddress("0x0000000000000000000000000000000000000001")
+	token := common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
+
+	safeTransferTargetedInput := []byte(fmt.Sprintf(`{"path":"safe_transfer_targeted","data":{"token":"%s","to":"%s","amount":"%s"}}`, token, to, amount))
+	safeTransferTargetedOutput := s.tester.Advance(to, safeTransferTargetedInput)
+	s.Nil(safeTransferTargetedOutput.Err)
+	s.Len(safeTransferTargetedOutput.DelegateCallVouchers, 1)
+	s.Equal(safeERC20TransferAddress, safeTransferTargetedOutput.DelegateCallVouchers[0].Destination)
+
+	abiJSON := `[{
 		"type":"function",
 		"name":"safeTransferTargeted",
 		"inputs":[
@@ -61,42 +134,26 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherSafeTransfer() {
 			{"type":"uint256"}
 		]
 	}]`
-	safeTransferABI, err := abi.JSON(strings.NewReader(abiJSON))
+	safeTransferTargetedABI, err := abi.JSON(strings.NewReader(abiJSON))
 	s.Require().NoError(err)
 
-	halfAmount := new(big.Int).Div(amount, big.NewInt(2))
-	unpacked, err := safeTransferABI.Methods["safeTransfer"].Inputs.Unpack(result.DelegateCallVouchers[0].Payload[4:])
+	unpacked, err := safeTransferTargetedABI.Methods["safeTransferTargeted"].Inputs.Unpack(safeTransferTargetedOutput.DelegateCallVouchers[0].Payload[4:])
 	s.Require().NoError(err)
 	s.Equal(token, unpacked[0].(common.Address))
 	s.Equal(to, unpacked[1].(common.Address))
-	s.Equal(halfAmount, unpacked[2].(*big.Int))
-
-	unpackedTargeted, err := safeTransferABI.Methods["safeTransferTargeted"].Inputs.Unpack(result.DelegateCallVouchers[1].Payload[4:])
-	s.Require().NoError(err)
-	s.Equal(token, unpackedTargeted[0].(common.Address))
-	s.Equal(anyone, unpackedTargeted[1].(common.Address))
-	s.Equal(to, unpackedTargeted[2].(common.Address))
-	s.Equal(halfAmount, unpackedTargeted[3].(*big.Int))
+	s.Equal(to, unpacked[2].(common.Address))
+	s.Equal(amount, unpacked[3].(*big.Int))
 }
 
-func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyERC20Withdraw() {
+func (s *DelegateCallVoucher) TestDelegateCallVoucherEmergencyERC20Withdraw() {
+	to := common.HexToAddress("0x0000000000000000000000000000000000000001")
 	token := common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa")
-	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
 
-	input := map[string]interface{}{
-		"path": "emergency_erc20_withdraw",
-		"data": map[string]interface{}{
-			"token": token,
-			"to":    to,
-		},
-	}
-	payload, err := json.Marshal(input)
-	s.Require().NoError(err)
-
-	result := s.tester.Advance(to, payload)
-	s.Nil(result.Err)
-	s.Len(result.DelegateCallVouchers, 1)
-	s.Equal(emergencyWithdrawAddress, result.DelegateCallVouchers[0].Destination)
+	emergencyERC20WithdrawInput := []byte(fmt.Sprintf(`{"path":"emergency_erc20_withdraw","data":{"token":"%s","to":"%s"}}`, token, to))
+	emergencyERC20WithdrawOutput := s.tester.Advance(to, emergencyERC20WithdrawInput)
+	s.Nil(emergencyERC20WithdrawOutput.Err)
+	s.Len(emergencyERC20WithdrawOutput.DelegateCallVouchers, 1)
+	s.Equal(emergencyWithdrawAddress, emergencyERC20WithdrawOutput.DelegateCallVouchers[0].Destination)
 
 	abiJSON := `[{
 		"type":"function",
@@ -109,28 +166,20 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyERC20Withdr
 	emergencyWithdrawABI, err := abi.JSON(strings.NewReader(abiJSON))
 	s.Require().NoError(err)
 
-	unpacked, err := emergencyWithdrawABI.Methods["emergencyERC20Withdraw"].Inputs.Unpack(result.DelegateCallVouchers[0].Payload[4:])
+	unpacked, err := emergencyWithdrawABI.Methods["emergencyERC20Withdraw"].Inputs.Unpack(emergencyERC20WithdrawOutput.DelegateCallVouchers[0].Payload[4:])
 	s.Require().NoError(err)
 	s.Equal(token, unpacked[0].(common.Address))
 	s.Equal(to, unpacked[1].(common.Address))
 }
 
-func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyETHWithdraw() {
-	to := common.HexToAddress("0x0000000000000000000000000000000000000000")
+func (s *DelegateCallVoucher) TestDelegateCallVoucherEmergencyETHWithdraw() {
+	to := common.HexToAddress("0x0000000000000000000000000000000000000001")
 
-	input := map[string]interface{}{
-		"path": "emergency_eth_withdraw",
-		"data": map[string]interface{}{
-			"to": to,
-		},
-	}
-	payload, err := json.Marshal(input)
-	s.Require().NoError(err)
-
-	result := s.tester.Advance(to, payload)
-	s.Nil(result.Err)
-	s.Len(result.DelegateCallVouchers, 1)
-	s.Equal(emergencyWithdrawAddress, result.DelegateCallVouchers[0].Destination)
+	emergencyETHWithdrawInput := []byte(fmt.Sprintf(`{"path":"emergency_eth_withdraw","data":{"to":"%s"}}`, to))
+	emergencyETHWithdrawOutput := s.tester.Advance(to, emergencyETHWithdrawInput)
+	s.Nil(emergencyETHWithdrawOutput.Err)
+	s.Len(emergencyETHWithdrawOutput.DelegateCallVouchers, 1)
+	s.Equal(emergencyWithdrawAddress, emergencyETHWithdrawOutput.DelegateCallVouchers[0].Destination)
 
 	abiJSON := `[{
 		"type":"function",
@@ -142,7 +191,17 @@ func (s *DelegateCallVoucherExample) TestDelegateCallVoucherEmergencyETHWithdraw
 	emergencyETHWithdrawABI, err := abi.JSON(strings.NewReader(abiJSON))
 	s.Require().NoError(err)
 
-	unpacked, err := emergencyETHWithdrawABI.Methods["emergencyETHWithdraw"].Inputs.Unpack(result.DelegateCallVouchers[0].Payload[4:])
+	unpacked, err := emergencyETHWithdrawABI.Methods["emergencyETHWithdraw"].Inputs.Unpack(emergencyETHWithdrawOutput.DelegateCallVouchers[0].Payload[4:])
 	s.Require().NoError(err)
 	s.Equal(to, unpacked[0].(common.Address))
+}
+
+func (s *DelegateCallVoucher) TestInspectContracts() {
+	contractsInput := []byte(`{"path":"contracts"}`)
+	contractsOutput := s.tester.Inspect(contractsInput)
+	s.Nil(contractsOutput.Err)
+	s.Len(contractsOutput.Reports, 1)
+
+	expectedContractsOutput := fmt.Sprintf(`[{"name":"NFT","address":"%s"},{"name":"NFTFactory","address":"%s"},{"name":"EmergencyWithdraw","address":"%s"},{"name":"SafeERC20Transfer","address":"%s"}]`, nftAddress, nftFactoryAddress, emergencyWithdrawAddress, safeERC20TransferAddress)
+	s.Equal(string(contractsOutput.Reports[0].Payload), expectedContractsOutput)
 }

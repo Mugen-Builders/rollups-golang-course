@@ -6,18 +6,23 @@ import (
 	"fmt"
 	"log/slog"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-playground/validator/v10"
+	"github.com/holiman/uint256"
 	"github.com/rollmelette/rollmelette"
 )
 
 var (
-	anyone                   = common.HexToAddress("0x14dC79964da2C08b23698B3D3cc7Ca32193d9955")
-	emergencyWithdrawAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+	nftAddress               common.Address
+	nftFactoryAddress        = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+	safeERC721MintAddress    = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 	safeERC20TransferAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+	emergencyWithdrawAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 )
 
 type Application struct{}
@@ -38,69 +43,169 @@ func (a *Application) Advance(
 
 	validator := validator.New()
 	if err := validator.Struct(input); err != nil {
-		return err
-	}
-
-	if deposit != nil {
-		switch d := deposit.(type) {
-		case *rollmelette.ERC20Deposit:
-			if input.Path == "safe_transfer" {
-				abiJSON := `[{
-					"type":"function",
-					"name":"safeTransfer",
-					"inputs":[
-						{"type":"address"},
-						{"type":"address"},
-						{"type":"uint256"}
-					]
-				},
-				{
-					"type":"function",
-					"name":"safeTransferTargeted",
-					"inputs":[
-						{"type":"address"},
-						{"type":"address"},
-						{"type":"address"},
-						{"type":"uint256"}
-					]
-				}]`
-				abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-				if err != nil {
-					return err
-				}
-
-				halfAmount := new(big.Int).Div(d.Value, big.NewInt(2))
-
-				delegateCallVoucher, err := abiInterface.Pack("safeTransfer", d.Token, d.Sender, halfAmount)
-				if err != nil {
-					return err
-				}
-
-				delegateCallVoucherTargeted, err := abiInterface.Pack("safeTransferTargeted", d.Token, anyone, d.Sender, halfAmount)
-				if err != nil {
-					return err
-				}
-
-				env.SetERC20Balance(d.Token, d.Sender, new(big.Int).Sub(env.ERC20BalanceOf(d.Token, d.Sender), d.Value))
-
-				env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucher)
-				env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallVoucherTargeted)
-				return nil
-			}
-		default:
-			env.Report([]byte(fmt.Sprintf("Unknown deposit type: %T", d)))
-			return nil
-		}
+		return fmt.Errorf("failed to validate input: %w", err)
 	}
 
 	switch input.Path {
-	case "emergency_erc20_withdraw":
-		var emergencyInput struct {
-			Token common.Address `json:"token"`
-			To    common.Address `json:"to"`
+	case "deploy_nft":
+		var data struct {
+			Name  string `json:"name" validate:"required"`
+			Symbol string `json:"symbol" validate:"required"`
 		}
-		if err := json.Unmarshal(input.Data, &emergencyInput); err != nil {
+		if err := json.Unmarshal(input.Data, &data); err != nil {
 			return err
+		}
+		bytecode, err := getNFTBytecode()
+		if err != nil {
+			return err
+		}
+		stringType, _ := abi.NewType("string", "", nil)
+		addressType, _ := abi.NewType("address", "", nil)
+		constructorArgs, err := abi.Arguments{
+			{Type: addressType},
+			{Type: stringType},
+			{Type: stringType},
+		}.Pack(metadata.AppContract, data.Name, data.Symbol)
+		if err != nil {
+			return fmt.Errorf("error encoding constructor args: %w", err)
+		}
+		nftAddress = crypto.CreateAddress2(
+			nftFactoryAddress,
+			common.HexToHash(strconv.Itoa(metadata.Index)),
+			crypto.Keccak256(append(bytecode, constructorArgs...)),
+		)
+		deployNFTPayload, err := deployNFT(
+			metadata.AppContract,
+			common.HexToHash(strconv.Itoa(metadata.Index)),
+			data.Name,
+			data.Symbol,
+		)
+		if err != nil {
+			return err
+		}
+		env.Voucher(nftFactoryAddress, big.NewInt(0), deployNFTPayload)
+		return nil
+
+	case "mint_nft":
+		var data struct {
+			To  common.Address `json:"to" validate:"required"`
+			URI string         `json:"uri" validate:"required"`
+		}
+		if err := json.Unmarshal(input.Data, &data); err != nil {
+			return err
+		}
+		if err := validator.Struct(data); err != nil {
+			return fmt.Errorf("failed to validate input: %w", err)
+		}
+		mintNFTPayload, err := mintNFT(nftAddress, data.To, data.URI)
+		if err != nil {
+			return err
+		}
+		env.DelegateCallVoucher(safeERC721MintAddress, mintNFTPayload)
+		return nil
+
+	case "safe_transfer":
+		var data struct {
+			Token  common.Address `json:"token" validate:"required"`
+			To     common.Address `json:"to" validate:"required"`
+			Amount *uint256.Int   `json:"amount" validate:"required"`
+		}
+		if err := json.Unmarshal(input.Data, &data); err != nil {
+			return err
+		}
+		if err := validator.Struct(data); err != nil {
+			return fmt.Errorf("failed to validate input: %w", err)
+		}
+		abiJSON := `[{
+			"type":"function",
+			"name":"safeTransfer",
+			"inputs":[
+				{"type":"address"},
+				{"type":"address"},
+				{"type":"uint256"}
+			]
+		}]`
+		abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+		if err != nil {
+			return err
+		}
+		delegateCallPayload, err := abiInterface.Pack(
+			"safeTransfer",
+			data.Token,
+			data.To,
+			data.Amount.ToBig(),
+		)
+		if err != nil {
+			return err
+		}
+		env.SetERC20Balance(
+			data.Token,
+			metadata.MsgSender,
+			new(big.Int).Sub(
+				env.ERC20BalanceOf(data.Token, metadata.MsgSender),
+				data.Amount.ToBig(),
+			),
+		)
+		env.DelegateCallVoucher(safeERC20TransferAddress, delegateCallPayload)
+		return nil
+
+	case "safe_transfer_targeted":
+		var data struct {
+			Token  common.Address `json:"token" validate:"required"`
+			To     common.Address `json:"to" validate:"required"`
+			Amount *uint256.Int   `json:"amount" validate:"required"`
+		}
+		if err := json.Unmarshal(input.Data, &data); err != nil {
+			return err
+		}
+		if err := validator.Struct(data); err != nil {
+			return fmt.Errorf("failed to validate input: %w", err)
+		}
+		abiJSON := `[{
+			"type":"function",
+			"name":"safeTransferTargeted",
+			"inputs":[
+				{"type":"address"},
+				{"type":"address"},
+				{"type":"address"},
+				{"type":"uint256"}
+			]
+		}]`
+		abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+		if err != nil {
+			return err
+		}
+		safeTransferTargetedPayload, err := abiInterface.Pack(
+			"safeTransferTargeted",
+			data.Token,
+			data.To,
+			data.To,
+			data.Amount.ToBig(),
+		)
+		if err != nil {
+			return err
+		}
+		env.SetERC20Balance(
+			data.Token,
+			metadata.MsgSender,
+			new(big.Int).Sub(
+				env.ERC20BalanceOf(data.Token, metadata.MsgSender),
+				data.Amount.ToBig(),
+			),
+		)
+		env.DelegateCallVoucher(safeERC20TransferAddress, safeTransferTargetedPayload)
+		return nil
+
+	case "emergency_erc20_withdraw":
+		var data struct {
+			Token common.Address `json:"token" validate:"required"`
+			To    common.Address `json:"to" validate:"required"`
+		}
+		if err := json.Unmarshal(input.Data, &data); err != nil {
+			return err
+		}
+		if err := validator.Struct(data); err != nil {
+			return fmt.Errorf("failed to validate input: %w", err)
 		}
 		abiJSON := `[{
 			"type":"function",
@@ -114,19 +219,26 @@ func (a *Application) Advance(
 		if err != nil {
 			return err
 		}
-		delegateCallVoucher, err := abiInterface.Pack("emergencyERC20Withdraw", emergencyInput.Token, emergencyInput.To)
+		emergencyERC20WithdrawPayload, err := abiInterface.Pack(
+			"emergencyERC20Withdraw",
+			data.Token,
+			data.To,
+		)
 		if err != nil {
 			return err
 		}
-		env.DelegateCallVoucher(emergencyWithdrawAddress, delegateCallVoucher)
+		env.DelegateCallVoucher(emergencyWithdrawAddress, emergencyERC20WithdrawPayload)
 		return nil
 
 	case "emergency_eth_withdraw":
-		var emergencyInput struct {
-			To common.Address `json:"to"`
+		var data struct {
+			To common.Address `json:"to" validate:"required"`
 		}
-		if err := json.Unmarshal(input.Data, &emergencyInput); err != nil {
+		if err := json.Unmarshal(input.Data, &data); err != nil {
 			return err
+		}
+		if err := validator.Struct(data); err != nil {
+			return fmt.Errorf("failed to validate input: %w", err)
 		}
 		abiJSON := `[{
 			"type":"function",
@@ -139,19 +251,103 @@ func (a *Application) Advance(
 		if err != nil {
 			return err
 		}
-		delegateCallVoucher, err := abiInterface.Pack("emergencyETHWithdraw", emergencyInput.To)
+		emergencyETHWithdrawPayload, err := abiInterface.Pack(
+			"emergencyETHWithdraw",
+			data.To,
+		)
 		if err != nil {
 			return err
 		}
-		env.DelegateCallVoucher(emergencyWithdrawAddress, delegateCallVoucher)
+		env.DelegateCallVoucher(emergencyWithdrawAddress, emergencyETHWithdrawPayload)
 		return nil
-	}
 
-	return nil
+	default:
+		env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))
+		return fmt.Errorf("unknown path: %s", input.Path)
+	}
 }
 
 func (a *Application) Inspect(env rollmelette.EnvInspector, payload []byte) error {
-	return nil
+	var input struct {
+		Path string          `json:"path" validate:"required"`
+		Data json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(payload, &input); err != nil {
+		return err
+	}
+	validator := validator.New()
+	if err := validator.Struct(input); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+	switch input.Path {
+	case "contracts":
+		contractsJson := fmt.Sprintf(
+			`[{"name":"NFT","address":"%s"},{"name":"NFTFactory","address":"%s"},{"name":"EmergencyWithdraw","address":"%s"},{"name":"SafeERC20Transfer","address":"%s"}]`,
+			nftAddress,
+			nftFactoryAddress,
+			emergencyWithdrawAddress,
+			safeERC20TransferAddress,
+		)
+		env.Report([]byte(contractsJson))
+		return nil
+	default:
+		env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))
+		return fmt.Errorf("unknown path: %s", input.Path)
+	}
+}
+
+func deployNFT(initialOwner common.Address, salt common.Hash, name string, symbol string) ([]byte, error) {
+	abiJSON := `[{
+		"type":"function",
+		"name":"newNFT",
+		"inputs":[
+			{"type":"address"},
+			{"type":"bytes32"},
+			{"type":"string"},
+			{"type":"string"}
+		]
+	}]`
+	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ABI: %w", err)
+	}
+	voucher, err := abiInterface.Pack(
+		"newNFT",
+		initialOwner,
+		salt,
+		name,
+		symbol,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pack ABI: %w", err)
+	}
+	return voucher, nil
+}
+
+func mintNFT(nft common.Address, to common.Address, uri string) ([]byte, error) {
+	abiJSON := `[{
+		"type":"function",
+		"name":"safeMint",
+		"inputs":[
+			{"type":"address"},
+			{"type":"address"},
+			{"type":"string"}
+		]
+	}]`
+	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ABI: %w", err)
+	}
+	safeMintPayload, err := abiInterface.Pack(
+		"safeMint",
+		nft,
+		to,
+		uri,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pack ABI: %w", err)
+	}
+	return safeMintPayload, nil
 }
 
 func main() {

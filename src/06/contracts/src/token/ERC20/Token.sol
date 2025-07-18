@@ -6,7 +6,7 @@ import {ERC20} from "@openzeppelin-contracts-5.2.0/token/ERC20/ERC20.sol";
 import {ERC20Burnable} from "@openzeppelin-contracts-5.2.0/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Pausable} from "@openzeppelin-contracts-5.2.0/token/ERC20/extensions/ERC20Pausable.sol";
 
-contract MyERC20Token is ERC20, ERC20Burnable, ERC20Pausable {
+contract Token is ERC20, ERC20Burnable, ERC20Pausable {
     constructor() ERC20("MyToken", "MTK") {}
 
     function pause() public {

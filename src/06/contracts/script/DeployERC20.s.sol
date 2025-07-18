@@ -1,20 +1,20 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.27;
 
+import {Token} from "../src/token/ERC20/Token.sol";
 import {Script, console} from "forge-std-1.9.7/src/Script.sol";
-import {NFTFactory} from "../src/token/ERC721/NFTFactory.sol";
 
-contract Deploy is Script {
-    NFTFactory public nftFactory;
+contract DeployERC20 is Script {
+    Token public token;
 
-    function run() public returns (NFTFactory) {
+    function run() public returns (Token) {
         vm.startBroadcast();
-        nftFactory = new NFTFactory();
+        token = new Token();
         vm.stopBroadcast();
 
         _saveDeploymentInfo();
 
-        return nftFactory;
+        return token;
     }
 
     function _saveDeploymentInfo() internal {
@@ -27,8 +27,8 @@ contract Deploy is Script {
             vm.toString(block.timestamp),
             ",",
             '"contracts":{',
-            '"nftFactory":"',
-            vm.toString(address(nftFactory)),
+            '"token":"',
+            vm.toString(address(token)),
             '"',
             "}",
             "}}"

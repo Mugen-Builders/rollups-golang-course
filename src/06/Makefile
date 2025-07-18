@@ -1,13 +1,10 @@
 .PHONY: all
 all: help
 
-.PHONY: lint
-lint: ## Run the golangci linter
-	golangci-lint run
-
 .PHONY: test
 test: ## Run the application unit tests
-	go test -v ./...
+	@go test -v ./...
+	@forge test --root ./contracts
 
 .PHONY: build
 build: ## Build the application RISC-V image with cartesi cli

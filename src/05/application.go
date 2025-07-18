@@ -17,53 +17,11 @@ import (
 )
 
 var (
-	NFTFactoryAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
+	nftAddress        common.Address
+	nftFactoryAddress = common.HexToAddress("0xfafafafafafafafafafafafafafafafafafafafa") // TODO: replace with the actual address
 )
 
-type Application struct {
-	NFT common.Address
-}
-
-func (a *Application) DeployNFT(initialOwner common.Address, salt common.Hash) ([]byte, error) {
-	abiJSON := `[{
-		"type":"function",
-		"name":"newNFT",
-		"inputs":[
-			{"type":"address"},
-			{"type":"bytes32"}
-		]
-	}]`
-	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-	if err != nil {
-		return nil, err
-	}
-
-	voucher, err := abiInterface.Pack("newNFT", initialOwner, salt)
-	if err != nil {
-		return nil, err
-	}
-	return voucher, nil
-}
-
-func (a *Application) MintNFT(to common.Address, uri string) ([]byte, error) {
-	abiJSON := `[{
-		"type":"function",
-		"name":"safeMint",
-		"inputs":[
-			{"type":"address"},
-			{"type":"string"}
-		]
-	}]`
-	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
-	if err != nil {
-		return nil, err
-	}
-	voucher, err := abiInterface.Pack("safeMint", to, uri)
-	if err != nil {
-		return nil, err
-	}
-	return voucher, nil
-}
+type Application struct{}
 
 func (a *Application) Advance(
 	env rollmelette.Env,
@@ -72,7 +30,7 @@ func (a *Application) Advance(
 	payload []byte,
 ) error {
 	var input struct {
-		Path string          `json:"path"`
+		Path string          `json:"path" validate:"required"`
 		Data json.RawMessage `json:"data"`
 	}
 	if err := json.Unmarshal(payload, &input); err != nil {
@@ -86,56 +44,133 @@ func (a *Application) Advance(
 
 	switch input.Path {
 	case "deploy_nft":
+		var data struct {
+			Name   string `json:"name" validate:"required"`
+			Symbol string `json:"symbol" validate:"required"`
+		}
+		if err := json.Unmarshal(input.Data, &data); err != nil {
+			return err
+		}
 		bytecode, err := getNFTBytecode()
 		if err != nil {
 			return err
 		}
-
+		stringType, _ := abi.NewType("string", "", nil)
 		addressType, _ := abi.NewType("address", "", nil)
 		constructorArgs, err := abi.Arguments{
 			{Type: addressType},
-		}.Pack(metadata.AppContract)
+			{Type: stringType},
+			{Type: stringType},
+		}.Pack(metadata.AppContract, data.Name, data.Symbol)
 		if err != nil {
 			return fmt.Errorf("error encoding constructor args: %w", err)
 		}
-
-		a.NFT = crypto.CreateAddress2(
-			NFTFactoryAddress,
+		nftAddress = crypto.CreateAddress2(
+			nftFactoryAddress,
 			common.HexToHash(strconv.Itoa(metadata.Index)),
 			crypto.Keccak256(append(bytecode, constructorArgs...)),
 		)
-
-		deployNFTPayload, err := a.DeployNFT(
+		deployNFTPayload, err := deployNFT(
 			metadata.AppContract,
 			common.HexToHash(strconv.Itoa(metadata.Index)),
 		)
 		if err != nil {
 			return err
 		}
-		env.Voucher(NFTFactoryAddress, big.NewInt(0), deployNFTPayload)
+		env.Voucher(nftFactoryAddress, big.NewInt(0), deployNFTPayload)
+		return nil
+
 	case "mint_nft":
-		var mintNFTInput struct {
-			To    common.Address `json:"to"`
-			URI   string         `json:"uri"`
+		var data struct {
+			To  common.Address `json:"to" validate:"required"`
+			URI string         `json:"uri" validate:"required"`
 		}
-		if err := json.Unmarshal(input.Data, &mintNFTInput); err != nil {
+		if err := json.Unmarshal(input.Data, &data); err != nil {
 			return err
 		}
-		voucher, err := a.MintNFT(mintNFTInput.To, mintNFTInput.URI)
+		if err := validator.Struct(data); err != nil {
+			return fmt.Errorf("failed to validate input: %w", err)
+		}
+		voucher, err := mintNFT(data.To, data.URI)
 		if err != nil {
 			return err
 		}
-		env.Voucher(a.NFT, big.NewInt(0), voucher)
+		env.Voucher(nftAddress, big.NewInt(0), voucher)
+		return nil
+
 	default:
-		// using report to log an error
 		env.Report([]byte(fmt.Sprintf("Unknown path: %s", input.Path)))
 		return fmt.Errorf("unknown path: %s", input.Path)
 	}
-	return nil
 }
 
 func (a *Application) Inspect(env rollmelette.EnvInspector, payload []byte) error {
-	return nil
+	var data struct {
+		Path string          `json:"path" validate:"required"`
+		Data json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(payload, &data); err != nil {
+		return err
+	}
+	validator := validator.New()
+	if err := validator.Struct(data); err != nil {
+		return fmt.Errorf("failed to validate input: %w", err)
+	}
+	switch data.Path {
+	case "contracts":
+		contractsJson := fmt.Sprintf(
+			`[{"name":"NFT","address":"%s"},{"name":"NFTFactory","address":"%s"}]`,
+			nftAddress,
+			nftFactoryAddress,
+		)
+		env.Report([]byte(contractsJson))
+		return nil
+
+	default:
+		env.Report([]byte(fmt.Sprintf("Unknown path: %s", data.Path)))
+		return fmt.Errorf("unknown path: %s", data.Path)
+	}
+}
+
+func deployNFT(initialOwner common.Address, salt common.Hash) ([]byte, error) {
+	abiJSON := `[{
+		"type":"function",
+		"name":"newNFT",
+		"inputs":[
+			{"type":"address"},
+			{"type":"bytes32"}
+		]
+	}]`
+	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ABI: %w", err)
+	}
+
+	voucher, err := abiInterface.Pack("newNFT", initialOwner, salt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pack ABI: %w", err)
+	}
+	return voucher, nil
+}
+
+func mintNFT(to common.Address, uri string) ([]byte, error) {
+	abiJSON := `[{
+		"type":"function",
+		"name":"safeMint",
+		"inputs":[
+			{"type":"address"},
+			{"type":"string"}
+		]
+	}]`
+	abiInterface, err := abi.JSON(strings.NewReader(abiJSON))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ABI: %w", err)
+	}
+	voucher, err := abiInterface.Pack("safeMint", to, uri)
+	if err != nil {
+		return nil, fmt.Errorf("failed to pack ABI: %w", err)
+	}
+	return voucher, nil
 }
 
 func main() {

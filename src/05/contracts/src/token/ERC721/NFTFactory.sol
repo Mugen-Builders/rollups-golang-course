@@ -8,21 +8,21 @@ contract NFTFactory {
     event NFTDeployed(address indexed nft, bytes32 salt);
     event NFTAlreadyDeployed(address indexed nft, bytes32 salt);
 
-    function newNFT(address initialOwner, bytes32 salt) external returns (NFT) {
-        address predicted = computeAddress(initialOwner, salt);
+    function newNFT(address initialOwner, bytes32 salt, string memory name, string memory symbol) external returns (NFT) {
+        address predicted = computeAddress(initialOwner, salt, name, symbol);
 
         if (predicted.code.length > 0) {
             emit NFTAlreadyDeployed(predicted, salt);
             return NFT(predicted);
         }
 
-        NFT nft = new NFT{salt: salt}(initialOwner);
+        NFT nft = new NFT{salt: salt}(initialOwner, name, symbol);
 
         emit NFTDeployed(address(nft), salt);
         return nft;
     }
 
-    function computeAddress(address initialOwner, bytes32 salt) public view returns (address) {
+    function computeAddress(address initialOwner, bytes32 salt, string memory name, string memory symbol) public view returns (address) {
         return address(
             uint160(
                 uint256(
@@ -31,7 +31,7 @@ contract NFTFactory {
                             bytes1(0xff),
                             address(this),
                             salt,
-                            keccak256(abi.encodePacked(type(NFT).creationCode, abi.encode(initialOwner)))
+                            keccak256(abi.encodePacked(type(NFT).creationCode, abi.encode(initialOwner, name, symbol)))
                         )
                     )
                 )

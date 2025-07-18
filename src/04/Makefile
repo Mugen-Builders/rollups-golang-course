@@ -1,10 +1,6 @@
 .PHONY: all
 all: help
 
-.PHONY: lint
-lint: ## Run the golangci linter
-	golangci-lint run
-
 .PHONY: test
 test: ## Run the application unit tests
 	go test -v ./...
